@@ -1,12 +1,12 @@
 {
     "name": "forwebsystem/notificationwhatsapp",
-    "description": ":package_description",
+    "description": "",
     "license": "license",
     "authors": [
         {
-            "name": "author name",
-            "email": "author email",
-            "homepage": "author homepage"
+            "name": "João Paulo Paranahyba",
+            "email": "joaopaulo@forwebsystem.com.br",
+            "homepage": "http://forwebsystem.com.br"
         }
     ],
     "homepage": "https://github.com/forwebsystem/notificationwhatsapp",

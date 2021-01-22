@@ -33,11 +33,11 @@ Please see [contributing.md](contributing.md) for details and a todolist.
 
 ## Security
 
-If you discover any security related issues, please email author email instead of using the issue tracker.
+If you discover any security related issues, please email joaopaulo@forwebsystem.com.br instead of using the issue tracker.
 
 ## Credits
 
-- [author name][link-author]
+- [João Paulo Paranahyba][link-author]
 - [All Contributors][link-contributors]
 
 ## License
@@ -55,3 +55,40 @@ license. Please see the [license file](license.md) for more information.
 [link-styleci]: https://styleci.io/repos/12345678
 [link-author]: https://github.com/forwebsystem
 [link-contributors]: ../../contributors
+
+** Enviando uma mensagem via Channel 
+
+use ForWebSystem\NotificationWhatsApp\Broadcasting\NotificationWhatsAppChannel;
+use ForWebSystem\NotificationWhatsApp\Services\Interfaces\NotificacaoMensagensInterface;
+
+     /**
+     * Get the notification's delivery channels.
+     *
+     * @param  mixed  $notifiable
+     * @return array
+     */
+    public function via($notifiable)
+    {
+        return [
+            NotificationWhatsAppChannel::class
+        ];
+    }
+    
+    /**
+     * Get the mail representation of the notification.
+     *
+     * @param  mixed  $notifiable
+     */
+    public function toWhatsApp($notifiable, NotificacaoMensagensInterface $configuracao)
+    {
+        return $configuracao->sendText($phone, $texto);
+    }
+
+
+** Via service 
+
+use ForWebSystem\NotificationWhatsApp\Services\NotificacaoZApiService;
+
+$notificacao = new NotificacaoZApiService($usuario, $idInstancia, $license);
+
+$notificacao->sendText($phone, $texto);

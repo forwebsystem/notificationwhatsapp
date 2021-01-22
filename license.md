@@ -1,5 +1,5 @@
 # The license
 
-Copyright (c) author name <author email>
+Copyright (c) João Paulo Paranahyba <joaopaulo@forwebsystem.com.br>
 
 ...Add your license text here...
