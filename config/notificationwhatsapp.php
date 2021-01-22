@@ -1,5 +1,5 @@
 <?php
 
 return [
-    'instancia_id' => '393D5C36B95AB040F336A61736E355B4'
+    'instancia_id' => env('ZAPI_INSTANCIA_ID', '')
 ];

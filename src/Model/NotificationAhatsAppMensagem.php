@@ -16,6 +16,7 @@ class NotificationAhatsAppMensagem extends Model
         'user_type',
         'user_id',
         'service',
+        'method',
         'url',
         'type_mensagem',
         'phone_destination',

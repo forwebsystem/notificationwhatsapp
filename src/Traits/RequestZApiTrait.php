@@ -7,7 +7,8 @@ use ForWebSystem\NotificationWhatsApp\Model\NotificationAhatsAppMensagem;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
 
-trait RequestZApiTrait {
+trait RequestZApiTrait
+{
 
     private $user;
 
@@ -24,55 +25,58 @@ trait RequestZApiTrait {
         $status = '200';
         try {
 
+            $options = [
+                'body' => json_encode($datas),
+                'headers' => [
+                    'Content-Type' => 'application/json'
+                ]
+            ];
+
             $cliente = new Client();
-            $response = $cliente->request($method, "{$this->url}/{$endPoint}", ['form_params' => $datas]);
+            $response = $cliente->request($method, "{$this->url}/{$endPoint}", $options);
             $content = json_decode($response->getBody()->getContents(), true);
 
-            if (!is_array($content)) {
-                throw new Exception('The request could not be loaded');
-            }
-
             return $content;
-
         } catch (\GuzzleHttp\Exception\ClientException $e) {
-
             $content = $e->getResponse()->getBody()->getContents();
             $result = json_decode($content);
 
             $status = $result->status ?? '500';
-            return "{$result->error}: {$result->message}";
-
+            $message = $result->message ?? '';
+            return "({$status}) {$result->error}: {$message}";
         } finally {
-            $this->saveLog($status, $endPoint, $datas, $content);
+            $this->saveLog($method, $status, $endPoint, $datas, $content);
         }
     }
 
-    private function saveLog($status, $endPoint, $datas, $content)
+    private function saveLog($method, $status, $endPoint, $datas, $content)
     {
 
         try {
 
             NotificationAhatsAppMensagem::create([
-                'user_type'         => get_class($this->user),
+                'user_type'         => get_class($this->user) ?? '--',
                 'user_id'           => $this->user->id ?? '0',
                 'service'           => 'zapi',
+                'method'            => $method,
                 'url'               => "{$this->url}/{$endPoint}",
                 'type_mensagem'     => $endPoint,
-                'phone_destination' => $datas['phone'],
+                'phone_destination' => $datas['phone'] ?? 'service',
                 'context'           => json_encode($datas),
                 'result'            => json_encode($content),
                 'status'            => $status,
             ]);
-
         } catch (Exception $error) {
 
             Log::debug(json_encode([
                 'error_save' => json_encode([
                     'message' => $error->getMessage(),
                 ]),
+                'method'    => $method,
                 'endPoint'  => $endPoint,
                 'dados'     => $datas,
-                'content'   => $content
+                'content'   => $content,
+                'status'    => $status,
             ]));
         }
     }

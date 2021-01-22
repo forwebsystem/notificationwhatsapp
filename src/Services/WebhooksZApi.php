@@ -13,6 +13,19 @@ class WebhooksZApi implements WebhooksInterface
 {
     use RequestZApiTrait;
 
+
+    /**
+     * Atualiza todos os webhook para o mesmo endereço de retorno
+     *
+     */
+    public function updateWebhook(string $url)
+    {
+        $this->updateWebhookDelivery($url);
+        $this->updateWebhookDisconnected($url);
+        $this->updateWebhookReceived($url);
+        $this->updateWebhookMessageStatus($url);
+    }
+
     /**
      *Atualiza o webhook de entrega da mensagem
      */

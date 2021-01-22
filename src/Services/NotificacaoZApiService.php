@@ -87,8 +87,8 @@ class NotificacaoZApiService implements NotificacaoMensagensInterface
         return $this->request('POST', 'send-link', [
             'phone'             => $phone,
             'message'           => $message,
-            'linkUrl'           => $linkUrl,
             'image'             => $image,
+            'linkUrl'           => $linkUrl,
             'title'             => $title,
             'linkDescription'   => $linkDescription
         ]);
