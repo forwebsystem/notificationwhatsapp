@@ -18,6 +18,7 @@ class NotificationWhatsAppServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         $this->loadRoutesFrom(__DIR__.'/routes/web.php');
         $this->loadRoutesFrom(__DIR__.'/routes/api.php');
+        $this->registerMigrations();
 
         // Publishing is only necessary when using the CLI.
         if ($this->app->runningInConsole()) {
@@ -40,6 +41,18 @@ class NotificationWhatsAppServiceProvider extends ServiceProvider
         });
     }
 
+    /**
+     * Register the package's migrations.
+     *
+     * @return void
+     */
+    private function registerMigrations()
+    {
+        if ( $this->app->runningInConsole() ) {
+            $this->loadMigrationsFrom(__DIR__.'/database/migrations');
+        }
+    }
+    
     /**
      * Get the services provided by the provider.
      *
