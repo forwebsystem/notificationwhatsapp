@@ -12,19 +12,19 @@ trait RequestZApiTrait
 {
 
     private $user;
-    private static $instancia;
+    private static $instancias=[];
 
     public static function getInstancia($user)
     {
-        if (!is_null(self::$instancia)) {
-            return self::$instancia;
+        if (!is_null(self::$instancias[__CLASS__])) {
+            return self::$instancias[__CLASS__];
         }
-        self::$instancia = new self($user, config('notificationwhatsapp.instancia_id'), $user->license );
+        self::$instancias[__CLASS__] = new self($user, config('notificationwhatsapp.instancia_id'), $user->license );
 
-        return self::$instancia;
+        return self::$instancias[__CLASS__];
     }
 
-    public function __construct($user, string $idInstancia, string $tokenInstancia)
+    private function __construct($user, string $idInstancia, string $tokenInstancia)
     {
         $this->user = $user;
         $this->url = "https://api.z-api.io/instances/{$idInstancia}/token/{$tokenInstancia}";

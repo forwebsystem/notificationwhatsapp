@@ -19,8 +19,8 @@ Route::middleware(['web', 'auth'])
     ->namespace('ForWebSystem\NotificationWhatsApp\Http\Controllers')
     ->group(function () {
 
-        Route::get('config/webhook',        ['as'   => 'config.webhook',        'uses'  => 'NotificationWhatsAppController@configuracao']);
-        Route::get('config/instancia',      ['as'   => 'config.instancia',      'uses'  => 'NotificationWhatsAppController@instancia']);
-        Route::get('config/disconnect',     ['as'   => 'config.disconnect',     'uses'  => 'NotificationWhatsAppController@disconnect']);
-        Route::get('config/message-status', ['as'   => 'config.message-status', 'uses'  => 'NotificationWhatsAppController@messageStatus']);
+        Route::get('config/{user}/webhook',        ['as'   => 'config.user.webhook',        'uses'  => 'NotificationWhatsAppController@configuracao']);
+        Route::get('config/{user}/instancia',      ['as'   => 'config.user.instancia',      'uses'  => 'NotificationWhatsAppController@instancia']);
+        Route::get('config/{user}/disconnect',     ['as'   => 'config.user.disconnect',     'uses'  => 'NotificationWhatsAppController@disconnect']);
+        Route::get('config/{user}/message-status', ['as'   => 'config.user.message-status', 'uses'  => 'NotificationWhatsAppController@messageStatus']);
 });

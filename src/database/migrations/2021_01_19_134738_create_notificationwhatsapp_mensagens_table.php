@@ -17,6 +17,7 @@ class CreateNotificationWhatsAppMensagensTable extends Migration
             $table->uuid('id')->primary();
             $table->morphs('user');
             $table->string('service');
+            $table->string('method');
             $table->string('url');
             $table->string('type_mensagem');
             $table->string('phone_destination');

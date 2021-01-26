@@ -11,12 +11,12 @@ use Illuminate\Routing\Controller;
 class NotificationWhatsAppController extends Controller
 {
 
-    public function configuracao()
+    public function configuracao($idUser)
     {
         try {
 
-            $user   = auth()->user();// app(User::class)->fill(['name' => 'API','email' => 'joa@tre.com','license' => '123']);
-            $config = new WebhooksZApi($user, config('notificationwhatsapp.instancia_id'), $user->license);
+            $user   = app(config('notificacaowhtasaoo.user_model'))->find($idUser);
+            $config = WebhooksZApi::getInstancia($user);
 
             $config->updateWebhookDelivery(route('notificacaowhatsapp.webhook.delivery'));
             $config->updateWebhookDisconnected(route('notificacaowhatsapp.webhook.disconnected'));
@@ -35,11 +35,11 @@ class NotificationWhatsAppController extends Controller
         }
     }
 
-    public function instancia()
+    public function instancia($idUser)
     {
         try {
-            $user   = auth()->user();// app(User::class)->fill(['name' => 'API','email' => 'joa@tre.com','license' => '123']);
-            $config = new InstanciaZApi($user, config('notificationwhatsapp.instancia_id'), $user->license);
+            $user   = app(config('notificacaowhtasaoo.user_model'))->find($idUser);
+            $config = InstanciaZApi::getInstancia($user);
 
             $imagens = $config->qrCode​Imagem();
             if (!empty($imagens['value'])) {
@@ -53,11 +53,11 @@ class NotificationWhatsAppController extends Controller
         }
     }
 
-    public function disconnect()
+    public function disconnect($idUser)
     {
         try {
-            $user   = auth()->user();// app(User::class)->fill(['name' => 'API','email' => 'joa@tre.com','license' => '123']);
-            $config = new InstanciaZApi($user, config('notificationwhatsapp.instancia_id'), $user->license);
+            $user   = app(config('notificacaowhtasaoo.user_model'))->find($idUser);
+            $config = InstanciaZApi::getInstancia($user);
 
             $config->disconnect();
 
