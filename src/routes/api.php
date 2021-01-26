@@ -14,6 +14,14 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+Route::middleware('api')
+    ->prefix('api/notificacaowhatsapp')
+    ->as('notificacaowhatsapp.')
+    ->namespace('ForWebSystem\NotificationWhatsApp\Http\Controllers')
+    ->group(function () {
+
+        Route::post('webhook/delivery',         ['as' => 'webhook.delivery',        'uses' => 'WebhookController@delivery']);
+        Route::post('webhook/disconnected',     ['as' => 'webhook.disconnected',    'uses' => 'WebhookController@disconnected']);
+        Route::post('webhook/received',         ['as' => 'webhook.received',        'uses' => 'WebhookController@received']);
+        Route::post('webhook/message-status',   ['as' => 'webhook.message-status',  'uses' => 'WebhookController@messageStatus']);
 });

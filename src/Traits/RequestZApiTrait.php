@@ -3,7 +3,7 @@
 namespace ForWebSystem\NotificationWhatsApp\Traits;
 
 use Exception;
-use ForWebSystem\NotificationWhatsApp\Model\NotificationAhatsAppMensagem;
+use ForWebSystem\NotificationWhatsApp\Model\NotificationWhatsAppMensagem;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
 
@@ -54,7 +54,7 @@ trait RequestZApiTrait
 
         try {
 
-            NotificationAhatsAppMensagem::create([
+            NotificationWhatsAppMensagem::create([
                 'user_type'         => get_class($this->user) ?? '--',
                 'user_id'           => $this->user->id ?? '0',
                 'service'           => 'zapi',

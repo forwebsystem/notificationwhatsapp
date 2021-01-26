@@ -2,6 +2,7 @@
 
 namespace ForWebSystem\NotificationWhatsApp\Events;
 
+use ForWebSystem\NotificationWhatsApp\Model\NotificationWhatsAppReceived;
 use ForWebSystem\NotificationWhatsApp\Model\WoowaMensagem;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -11,7 +12,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class NotificationWhatsAppRecebidoEvent
+class NotificationWhatsAppReceivedEvent
 {
 
     use Dispatchable,
@@ -19,7 +20,7 @@ class NotificationWhatsAppRecebidoEvent
         SerializesModels;
 
     /**
-     * @var WoowaMensagem
+     * @var NotificationWhatsAppReceived
      */
     public $mensagem = '';
 
@@ -28,9 +29,9 @@ class NotificationWhatsAppRecebidoEvent
      *
      * @return void
      */
-    public function __construct(WoowaMensagem $notificationwhatsMensagem)
+    public function __construct(NotificationWhatsAppReceived $notificationWhatsAppReceived)
     {
-        $this->mensagem = $notificationwhatsMensagem;
+        $this->mensagem = $notificationWhatsAppReceived;
     }
 
     /**

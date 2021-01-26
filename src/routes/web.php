@@ -75,3 +75,19 @@ Route::get('/notificacaowhatsapp/instancia', function () {
         $imagens
     ];
 });
+
+Route::get('/notificacaowhatsapp/instancia/disconnect', function () {
+
+    $user = User::first();
+    $config = new InstanciaZApi($user, config('notificationwhatsapp.instancia_id'), $user->license);
+
+    $imagens = $config->disconnect();
+    if (!empty($imagens['value'])) {
+        die("<img src='{$imagens['value']}' />");
+    }
+
+    return [
+        'status',
+        $imagens
+    ];
+});

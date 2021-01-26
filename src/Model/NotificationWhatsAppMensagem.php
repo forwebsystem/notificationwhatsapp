@@ -5,7 +5,7 @@ namespace ForWebSystem\NotificationWhatsApp\Model;
 use ForWebSystem\NotificationWhatsApp\Traits\UuidsTrait;
 use Illuminate\Database\Eloquent\Model;
 
-class NotificationAhatsAppMensagem extends Model
+class NotificationWhatsAppMensagem extends Model
 {
 
     use UuidsTrait;
@@ -13,15 +13,25 @@ class NotificationAhatsAppMensagem extends Model
     protected $table = 'notificationwhatsapp_mensagens';
 
     protected $fillable = [
+        'id',
         'user_type',
         'user_id',
         'service',
-        'method',
         'url',
         'type_mensagem',
         'phone_destination',
+        'phone_participant',
+        'sender_name',
+        'chat_name',
+        'momment',
+        'message_id',
+        'from_me',
         'context',
+        'photo',
+        'type',
         'result',
         'status',
     ];
+
+
 }

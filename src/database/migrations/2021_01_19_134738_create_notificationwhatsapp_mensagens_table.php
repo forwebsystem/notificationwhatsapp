@@ -20,7 +20,15 @@ class CreateNotificationWhatsAppMensagensTable extends Migration
             $table->string('url');
             $table->string('type_mensagem');
             $table->string('phone_destination');
+            $table->string('phone_participant')->nullable();
+            $table->string('sender_name')->nullable();
+            $table->string('chat_name')->nullable();
+            $table->string('momment')->nullable();
+            $table->string('message_id')->nullable();
+            $table->string('from_me')->nullable();
             $table->string('context');
+            $table->string('photo')->nullable();
+            $table->string('type')->nullable();
             $table->text('result');
             $table->string('status');
 
