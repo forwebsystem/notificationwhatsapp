@@ -38,12 +38,17 @@ trait RequestZApiTrait
 
             return $content;
         } catch (\GuzzleHttp\Exception\ClientException $e) {
-            $content = $e->getResponse()->getBody()->getContents();
-            $result = json_decode($content);
 
-            $status = $result->status ?? '500';
-            $message = $result->message ?? '';
-            return "({$status}) {$result->error}: {$message}";
+            $content    = $e->getResponse()->getBody()->getContents();
+            $content    = !empty($content) ? $content : $e->getMessage() ;
+            $result     = json_decode($content);
+
+            $status     = $result->status ?? '500';
+            $message    = $result->message ?? '';
+            $error      = $result->error ?? '';
+
+            return "({$status}) {$error}: {$message}";
+
         } finally {
             $this->saveLog($method, $status, $endPoint, $datas, $content);
         }

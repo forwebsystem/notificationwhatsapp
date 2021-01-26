@@ -3,6 +3,7 @@
 namespace ForWebSystem\NotificationWhatsApp\Http\Controllers;
 
 use App\User;
+use ForWebSystem\NotificationWhatsApp\Services\InstanciaZApi;
 use ForWebSystem\NotificationWhatsApp\Services\WebhooksZApi;
 use Illuminate\Routing\Controller;
 
@@ -25,5 +26,32 @@ class NotificationWhatsAppController extends Controller
         // $webhookReceived        = $config->updateWebhookReceived('https://webhook.site/7fcf4ef8-d8f4-4303-9ff8-6e3528f5bb49');
         // $webhookMessageStatus   = $config->updateWebhookMessageStatus('https://webhook.site/49ab69c5-8f56-47f5-bcd2-e6964ad4fb73');
 
+    }
+
+    public function instancia()
+    {
+        $user = User::first();
+        $config = new InstanciaZApi($user, config('notificationwhatsapp.instancia_id'), $user->license);
+
+        $imagens = $config->qrCode​Imagem();
+        if (!empty($imagens['value'])) {
+            die("<img src='{$imagens['value']}' />");
+        }
+
+        return '';
+
+    }
+
+    public function disconnect()
+    {
+        $user = User::first();
+        $config = new InstanciaZApi($user, config('notificationwhatsapp.instancia_id'), $user->license);
+
+        $imagens = $config->disconnect();
+        if (!empty($imagens['value'])) {
+            die("<img src='{$imagens['value']}' />");
+        }
+
+        return '';
     }
 }

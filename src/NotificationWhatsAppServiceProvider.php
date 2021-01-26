@@ -48,11 +48,9 @@ class NotificationWhatsAppServiceProvider extends ServiceProvider
      */
     private function registerMigrations()
     {
-        if ( $this->app->runningInConsole() ) {
-            $this->loadMigrationsFrom(__DIR__.'/database/migrations');
-        }
+        $this->loadMigrationsFrom(__DIR__.'/database/migrations');
     }
-    
+
     /**
      * Get the services provided by the provider.
      *
