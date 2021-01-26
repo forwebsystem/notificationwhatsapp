@@ -12,14 +12,13 @@ class NotificationWhatsAppController extends Controller
 
     public function configuracao()
     {
-        $user = User::first();
+        $user   = auth();// app(User::class)->fill(['name' => 'API','email' => 'joa@tre.com','license' => '123']);
         $config = new WebhooksZApi($user, config('notificationwhatsapp.instancia_id'), $user->license);
 
         $config->updateWebhookDelivery(route('notificacaowhatsapp.webhook.delivery'));
         $config->updateWebhookDisconnected(route('notificacaowhatsapp.webhook.disconnected'));
         $config->updateWebhookReceived(route('notificacaowhatsapp.webhook.received'));
         $config->updateWebhookMessageStatus(route('notificacaowhatsapp.webhook.messageStatus'));
-
 
         // $webhookDelivery        = $config->updateWebhookDelivery('https://webhook.site/ad295589-4175-411d-94c2-dc0b2618ceda');
         // $webhookDisconnected    = $config->updateWebhookDisconnected('https://webhook.site/7df9b8c0-674f-45c5-8a80-e36ff72dc69a');
@@ -30,7 +29,7 @@ class NotificationWhatsAppController extends Controller
 
     public function instancia()
     {
-        $user = User::first();
+        $user   = auth();// app(User::class)->fill(['name' => 'API','email' => 'joa@tre.com','license' => '123']);
         $config = new InstanciaZApi($user, config('notificationwhatsapp.instancia_id'), $user->license);
 
         $imagens = $config->qrCode​Imagem();
@@ -44,7 +43,7 @@ class NotificationWhatsAppController extends Controller
 
     public function disconnect()
     {
-        $user = User::first();
+        $user   = auth();// app(User::class)->fill(['name' => 'API','email' => 'joa@tre.com','license' => '123']);
         $config = new InstanciaZApi($user, config('notificationwhatsapp.instancia_id'), $user->license);
 
         $imagens = $config->disconnect();
