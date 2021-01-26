@@ -3,6 +3,7 @@
 namespace ForWebSystem\NotificationWhatsApp\Traits;
 
 use Exception;
+use ForWebSystem\NotificationWhatsApp\Exceptions\ClientException;
 use ForWebSystem\NotificationWhatsApp\Model\NotificationWhatsAppMensagem;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
@@ -11,6 +12,17 @@ trait RequestZApiTrait
 {
 
     private $user;
+    private static $instancia;
+
+    public static function getInstancia($user)
+    {
+        if (!is_null(self::$instancia)) {
+            return self::$instancia;
+        }
+        self::$instancia = new self($user, config('notificationwhatsapp.instancia_id'), $user->license );
+
+        return self::$instancia;
+    }
 
     public function __construct($user, string $idInstancia, string $tokenInstancia)
     {
@@ -40,15 +52,14 @@ trait RequestZApiTrait
         } catch (\GuzzleHttp\Exception\ClientException $e) {
 
             $content    = $e->getResponse()->getBody()->getContents();
-            $content    = !empty($content) ? $content : $e->getMessage() ;
+            $content    = !empty($content) ? $content : $e->getMessage();
             $result     = json_decode($content);
 
             $status     = $result->status ?? '500';
             $message    = $result->message ?? '';
             $error      = $result->error ?? '';
 
-            return "({$status}) {$error}: {$message}";
-
+            throw new ClientException($content, $e->getCode(), $e);
         } finally {
             $this->saveLog($method, $status, $endPoint, $datas, $content);
         }
