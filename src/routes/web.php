@@ -13,13 +13,14 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth')
+Route::middleware(['web', 'auth'])
     ->prefix('notificacaowhatsapp')
     ->as('notificacaowhatsapp.')
     ->namespace('ForWebSystem\NotificationWhatsApp\Http\Controllers')
     ->group(function () {
 
-        Route::get('config/webhook',    ['as'   => 'config.webhook',    'uses'  => 'NotificationWhatsAppController@configuracao']);
-        Route::get('config/instancia',  ['as'   => 'config.instancia',  'uses'  => 'NotificationWhatsAppController@instancia']);
-        Route::get('config/disconnect', ['as'   => 'config.disconnect', 'uses'  => 'NotificationWhatsAppController@disconnect']);
+        Route::get('config/webhook',        ['as'   => 'config.webhook',        'uses'  => 'NotificationWhatsAppController@configuracao']);
+        Route::get('config/instancia',      ['as'   => 'config.instancia',      'uses'  => 'NotificationWhatsAppController@instancia']);
+        Route::get('config/disconnect',     ['as'   => 'config.disconnect',     'uses'  => 'NotificationWhatsAppController@disconnect']);
+        Route::get('config/message-status', ['as'   => 'config.message-status', 'uses'  => 'NotificationWhatsAppController@messageStatus']);
 });
