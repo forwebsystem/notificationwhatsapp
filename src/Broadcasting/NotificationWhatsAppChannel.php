@@ -2,7 +2,6 @@
 
 namespace ForWebSystem\NotificationWhatsApp\Broadcasting;
 
-use ForWebSystem\NotificationWhatsApp\Services\NotificacaoZApiService;
 use Illuminate\Notifications\Notification;
 
 class NotificationWhatsAppChannel
@@ -18,7 +17,6 @@ class NotificationWhatsAppChannel
      */
     public function send($notifiable, Notification $notification)
     {
-        $notificacao = new NotificacaoZApiService($notifiable, config('notificationwhatsapp.instancia_id'), $notifiable->license);
-        return $notification->toWhatsApp($notifiable, $notificacao);
+        return $notification->toWhatsApp($notifiable);
     }
 }

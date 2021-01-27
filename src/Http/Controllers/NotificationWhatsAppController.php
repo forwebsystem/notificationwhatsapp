@@ -15,7 +15,7 @@ class NotificationWhatsAppController extends Controller
     {
         try {
 
-            $user   = app(config('notificacaowhtasaoo.user_model'))->find($idUser);
+            $user   = app(config('notificationwhatsapp.user_model'))->find($idUser);
             $config = WebhooksZApi::getInstancia($user);
 
             $config->updateWebhookDelivery(route('notificacaowhatsapp.webhook.delivery'));
@@ -38,7 +38,7 @@ class NotificationWhatsAppController extends Controller
     public function instancia($idUser)
     {
         try {
-            $user   = app(config('notificacaowhtasaoo.user_model'))->find($idUser);
+            $user   = app(config('notificationwhatsapp.user_model'))->find($idUser);
             $config = InstanciaZApi::getInstancia($user);
 
             $imagens = $config->qrCode​Imagem();
@@ -56,7 +56,7 @@ class NotificationWhatsAppController extends Controller
     public function disconnect($idUser)
     {
         try {
-            $user   = app(config('notificacaowhtasaoo.user_model'))->find($idUser);
+            $user   = app(config('notificationwhatsapp.user_model'))->find($idUser);
             $config = InstanciaZApi::getInstancia($user);
 
             $config->disconnect();

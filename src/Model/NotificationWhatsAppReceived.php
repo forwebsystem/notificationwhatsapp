@@ -29,6 +29,36 @@ class NotificationWhatsAppReceived extends Model
     }
 
 
+    public function getPhoneParticipant()
+    {
+        $numero             = $this->phone_participant;
+        $dd                 = substr($numero, 2,2);
+        $telefone           = substr($numero, 4);
+        return strlen($telefone) == 8 ? "{$dd}9{$telefone}" : "{$dd}{$telefone}";
+    }
+
+    public function getContext()
+    {
+        return json_decode($this->context);
+    }
+
+    public function html($height="150px")
+    {
+        $context = $this->getContext();
+        $type = $this->getTypeContext();
+        switch($type){
+
+            case 'text':
+                return $context->message;
+            case 'image':
+                $descricao = isset($context->caption) ? $context->caption : '';
+                return "<img src='{$context->imageUrl}' height='{$height}' width='auto' /><br />". $descricao ?? '';
+            default:
+                return "Mensagem do tipo {$type} ainda não suportada";
+
+        }
+    }
+
     public function getTypeContext()
     {
         $types = ['text', 'image', 'audio', 'video', 'contact', 'document', 'location', 'sticker'];

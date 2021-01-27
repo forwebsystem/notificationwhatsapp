@@ -2,14 +2,9 @@
 
 namespace ForWebSystem\NotificationWhatsApp\Services;
 
-use Carbon\Carbon;
-use DateTime;
-use DateTimeZone;
 use Exception;
 use ForWebSystem\NotificationWhatsApp\Model\NotificationWhatsAppMensagem;
 use ForWebSystem\NotificationWhatsApp\Services\Interfaces\NotificacaoMensagemReceivedInterface;
-use ForWebSystem\NotificationWhatsApp\Traits\RequestZApiTrait;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 
 /**

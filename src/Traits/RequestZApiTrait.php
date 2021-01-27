@@ -19,6 +19,11 @@ trait RequestZApiTrait
         if (isset(self::$instancias[__CLASS__])) {
             return self::$instancias[__CLASS__];
         }
+
+        if( $user->license == null ){
+            throw new ClientException("O usuario {$user->name} ainda não possui licensa para envio de notificações.");
+        }
+        
         self::$instancias[__CLASS__] = new self($user, config('notificationwhatsapp.instancia_id'), $user->license );
 
         return self::$instancias[__CLASS__];
