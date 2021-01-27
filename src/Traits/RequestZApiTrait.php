@@ -16,7 +16,7 @@ trait RequestZApiTrait
 
     public static function getInstancia($user)
     {
-        if (!is_null(self::$instancias[__CLASS__])) {
+        if (isset(self::$instancias[__CLASS__])) {
             return self::$instancias[__CLASS__];
         }
         self::$instancias[__CLASS__] = new self($user, config('notificationwhatsapp.instancia_id'), $user->license );
