@@ -20,11 +20,11 @@ trait RequestZApiTrait
             return self::$instancias[__CLASS__];
         }
 
-        if( $user->license == null ){
+        if( $user->notificationwhatsapp_token == null || $user->notificationwhatsapp_license == null ){
             throw new ClientException("O usuario {$user->name} ainda não possui licensa para envio de notificações.");
         }
-        
-        self::$instancias[__CLASS__] = new self($user, config('notificationwhatsapp.instancia_id'), $user->license );
+
+        self::$instancias[__CLASS__] = new self($user, $user->notificationwhatsapp_license, $user->notificationwhatsapp_token );
 
         return self::$instancias[__CLASS__];
     }
