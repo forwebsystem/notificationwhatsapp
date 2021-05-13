@@ -18,6 +18,8 @@ class NotificacaoZApiMensagemReceived implements NotificacaoMensagemReceivedInte
     {
         try {
 
+            $phone = isset($data['participantPhone']) ? $data['participantPhone'] : $data['phone'];
+
             return NotificationWhatsAppMensagem::create(array_merge([
                 'user_type'         => 'Webhook',
                 'user_id'           => '0',
@@ -26,7 +28,7 @@ class NotificacaoZApiMensagemReceived implements NotificacaoMensagemReceivedInte
                 'url'               => $url,
                 'type_mensagem'     => $type,
                 'phone_destination' => '--',
-                'phone_participant' => $data['participantPhone'] ?? '',
+                'phone_participant' => $phone,
                 'context'           => $this->getContext($data),
                 'result'            => json_encode($data),
                 'sender_name'       => $data['senderName'] ?? '',
@@ -45,7 +47,7 @@ class NotificacaoZApiMensagemReceived implements NotificacaoMensagemReceivedInte
                 'method'            => $method,
                 'url'               => $url,
                 'type_mensagem'     => $type,
-                'phone_participant' => $data['participantPhone'] ?? '',
+                'phone_participant' => $phone,
                 'context'           => $this->getContext($data),
                 'result'            => json_encode($data),
                 'sender_name'       => $data['senderName'] ?? '',

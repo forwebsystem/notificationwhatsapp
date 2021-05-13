@@ -42,7 +42,7 @@ class NotificationWhatsAppReceived extends Model
         return json_decode($this->context);
     }
 
-    public function html($height="150px")
+    public function html($height="250px")
     {
         $context = $this->getContext();
         $type = $this->getTypeContext();

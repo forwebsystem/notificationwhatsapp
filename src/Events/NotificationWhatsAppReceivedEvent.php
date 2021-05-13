@@ -2,6 +2,7 @@
 
 namespace ForWebSystem\NotificationWhatsApp\Events;
 
+use App\User;
 use ForWebSystem\NotificationWhatsApp\Model\NotificationWhatsAppReceived;
 use ForWebSystem\NotificationWhatsApp\Model\WoowaMensagem;
 use Illuminate\Broadcasting\Channel;
@@ -24,14 +25,17 @@ class NotificationWhatsAppReceivedEvent
      */
     public $mensagem = '';
 
+    public $user;
+
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(NotificationWhatsAppReceived $notificationWhatsAppReceived)
+    public function __construct(NotificationWhatsAppReceived $notificationWhatsAppReceived, ?User $user)
     {
         $this->mensagem = $notificationWhatsAppReceived;
+        $this->user = $user;
     }
 
     /**

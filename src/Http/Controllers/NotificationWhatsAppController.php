@@ -18,10 +18,10 @@ class NotificationWhatsAppController extends Controller
             $user   = app(config('notificationwhatsapp.user_model'))->find($idUser);
             $config = WebhooksZApi::getInstancia($user);
 
-            $config->updateWebhookDelivery(route('notificacaowhatsapp.webhook.delivery'));
-            $config->updateWebhookDisconnected(route('notificacaowhatsapp.webhook.disconnected'));
-            $config->updateWebhookReceived(route('notificacaowhatsapp.webhook.received'));
-            $config->updateWebhookMessageStatus(route('notificacaowhatsapp.webhook.message-status'));
+            $config->updateWebhookDelivery(route('notificacaowhatsapp.webhook.delivery',[$user->notificationwhatsapp_token]));
+            $config->updateWebhookDisconnected(route('notificacaowhatsapp.webhook.disconnected',[$user->notificationwhatsapp_token]));
+            $config->updateWebhookReceived(route('notificacaowhatsapp.webhook.received',[$user->notificationwhatsapp_token]));
+            $config->updateWebhookMessageStatus(route('notificacaowhatsapp.webhook.message-status',[$user->notificationwhatsapp_token]));
 
             // $webhookDelivery        = $config->updateWebhookDelivery('https://webhook.site/ad295589-4175-411d-94c2-dc0b2618ceda');
             // $webhookDisconnected    = $config->updateWebhookDisconnected('https://webhook.site/7df9b8c0-674f-45c5-8a80-e36ff72dc69a');

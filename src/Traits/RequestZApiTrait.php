@@ -16,17 +16,17 @@ trait RequestZApiTrait
 
     public static function getInstancia($user)
     {
-        if (isset(self::$instancias[__CLASS__])) {
-            return self::$instancias[__CLASS__];
+        if (isset(self::$instancias[$user->id][__CLASS__])) {
+            return self::$instancias[$user->id][__CLASS__];
         }
 
         if( $user->notificationwhatsapp_token == null || $user->notificationwhatsapp_license == null ){
             throw new ClientException("O usuario {$user->name} ainda não possui licensa para envio de notificações.");
         }
 
-        self::$instancias[__CLASS__] = new self($user, $user->notificationwhatsapp_license, $user->notificationwhatsapp_token );
+        self::$instancias[$user->id][__CLASS__] = new self($user, $user->notificationwhatsapp_license, $user->notificationwhatsapp_token );
 
-        return self::$instancias[__CLASS__];
+        return self::$instancias[$user->id][__CLASS__];
     }
 
     private function __construct($user, string $idInstancia, string $tokenInstancia)

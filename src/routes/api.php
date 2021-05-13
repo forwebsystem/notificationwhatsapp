@@ -20,8 +20,8 @@ Route::middleware('api')
     ->namespace('ForWebSystem\NotificationWhatsApp\Http\Controllers')
     ->group(function () {
 
-        Route::post('webhook/delivery',         ['as' => 'webhook.delivery',        'uses' => 'WebhookController@delivery']);
-        Route::post('webhook/disconnected',     ['as' => 'webhook.disconnected',    'uses' => 'WebhookController@disconnected']);
-        Route::post('webhook/received',         ['as' => 'webhook.received',        'uses' => 'WebhookController@received']);
-        Route::post('webhook/message-status',   ['as' => 'webhook.message-status',  'uses' => 'WebhookController@messageStatus']);
+        Route::post('webhook/{token}/delivery',         ['as' => 'webhook.delivery',        'uses' => 'WebhookController@delivery']);
+        Route::post('webhook/{token}/disconnected',     ['as' => 'webhook.disconnected',    'uses' => 'WebhookController@disconnected']);
+        Route::post('webhook/{token}/received',         ['as' => 'webhook.received',        'uses' => 'WebhookController@received']);
+        Route::post('webhook/{token}/message-status',   ['as' => 'webhook.message-status',  'uses' => 'WebhookController@messageStatus']);
 });

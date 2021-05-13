@@ -2,6 +2,7 @@
 
 namespace ForWebSystem\NotificationWhatsApp\Http\Controllers;
 
+use App\User;
 use ForWebSystem\NotificationWhatsApp\Events\NotificationWhatsAppReceivedEvent;
 use ForWebSystem\NotificationWhatsApp\Model\NotificationWhatsAppReceived;
 use ForWebSystem\NotificationWhatsApp\Services\NotificacaoZApiMensagemReceived;
@@ -17,12 +18,14 @@ class WebhookController extends Controller
     public function received()
     {
 
+        $usuario = User::whereNotificationwhatsappToken(request('token'))->first();
+
         $received = new NotificacaoZApiMensagemReceived();
         $mensagem = $received->save(request()->method(), request()->url(), 'received', request()->toArray());
 
         $received = new NotificationWhatsAppReceived($mensagem->toArray());
 
-        event(new NotificationWhatsAppReceivedEvent($received));
+        event(new NotificationWhatsAppReceivedEvent($received, $usuario));
     }
 
     /**
