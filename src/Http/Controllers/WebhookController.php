@@ -18,14 +18,28 @@ class WebhookController extends Controller
     public function received()
     {
 
-        $usuario = User::whereNotificationwhatsappToken(request('token'))->first();
+        try {
 
-        $received = new NotificacaoZApiMensagemReceived();
-        $mensagem = $received->save(request()->method(), request()->url(), 'received', request()->toArray());
+            $usuario = User::whereNotificationwhatsappToken(request('token'))->first();
 
-        $received = new NotificationWhatsAppReceived($mensagem->toArray());
+            $received = new NotificacaoZApiMensagemReceived();
+            $mensagem = $received->save(request()->method(), request()->url(), 'received', request()->toArray());
 
-        event(new NotificationWhatsAppReceivedEvent($received, $usuario));
+            $received = new NotificationWhatsAppReceived($mensagem->toArray());
+
+            event(new NotificationWhatsAppReceivedEvent($received, $usuario));
+
+            return response()->json([
+                'code' => 200,
+                'message' => 'Mensagem Received success'
+            ]);
+            
+        } catch (\Exception $th) {
+            return response([
+                'code' => 500,
+                'message' => $th->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -33,7 +47,6 @@ class WebhookController extends Controller
      */
     public function delivery()
     {
-
     }
 
     /**
@@ -41,7 +54,6 @@ class WebhookController extends Controller
      */
     public function disconnected()
     {
-
     }
 
 
@@ -50,7 +62,5 @@ class WebhookController extends Controller
      */
     public function messageStatus()
     {
-
     }
-
 }

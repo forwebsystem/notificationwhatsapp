@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('api')
+Route::middleware('api', 'requestLog:whatsapp-api', 'requestValidation:whatsapp-api')
     ->prefix('api/notificacaowhatsapp')
     ->as('notificacaowhatsapp.')
     ->namespace('ForWebSystem\NotificationWhatsApp\Http\Controllers')
