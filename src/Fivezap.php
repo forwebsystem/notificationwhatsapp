@@ -37,7 +37,7 @@ class Fivezap extends Notification
         int $account_id,
         string $token,
         string $service = 'fivezap',
-        string $content,
+        string $content
     ) {
         $this->host = $host;
         $this->token = $token;
