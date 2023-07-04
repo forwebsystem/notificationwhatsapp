@@ -9,7 +9,7 @@ class Fivezap extends Notification
      *
      * @var string
      */
-    private string $host;
+    private string $host = 'https://chat.fivezap.com.br/api/v1';
 
     /**
      * ID do usuario na API.
@@ -17,6 +17,13 @@ class Fivezap extends Notification
      * @var integer
      */
     private int $account_id;
+
+    /**
+     * ID da conversação atual na API.
+     *
+     * @var integer
+     */
+    private int $conversation_id;
 
     /**
      * Token do usuario na API.
@@ -33,15 +40,42 @@ class Fivezap extends Notification
     private string $service;
 
     public function __construct(
-        string $host,
         int $account_id,
         string $token,
-        string $service = 'fivezap',
-        string $content
+        string $content,
+        string $service = 'fivezap'
     ) {
-        $this->host = $host;
         $this->token = $token;
         $this->account_id = $account_id;
-        parent::__construct($service, $content);
+        $this->service = $service;
+
+        parent::__construct($content);
+    }
+
+    /**
+     * Coleta a mensagem de texto.
+     *
+     * @return object
+     */
+    public function text(): object
+    {
+        $this->method = 'POST';
+        $this->end_point = "$this->host/accounts/$this->account_id/conversations/$this->conversation_id/messages";
+
+        $this->data['content'] = $this->content;
+        $this->data['message_type'] = 'outgoing';
+
+        return $this;
+    }
+
+    /**
+     * Envia anexos da mensagem se existir.
+     *
+     * @return object
+     */
+    public function attachments(array $data): object
+    {
+        // code...,
+        return $this;
     }
 }

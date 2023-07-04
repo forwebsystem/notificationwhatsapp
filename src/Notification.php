@@ -21,34 +21,32 @@ abstract class Notification implements NotificationInterface
      *
      * @var string
      */
-    protected string $content;
+    protected string $content = null;
 
-    public function __construct(string $service, string $content)
+    /**
+     * Metodo para a requisição atual.
+     *
+     * @var string
+     */
+    protected string $method;
+
+    /**
+     * Endpoint a ser acessado.
+     *
+     * @var string
+     */
+    protected string $end_point;
+
+    /**
+     * Array de dados a ser usado na requisição.
+     *
+     * @var array
+     */
+    protected array $data = [];
+
+    public function __construct(string $content)
     {
-        $this->service = $service;
         $this->content = $content;
-    }
-
-    /**
-     * Coleta a mensagem de texto.
-     *
-     * @return object
-     */
-    public function text(string $content): object
-    {
-        // code...
-        return $this;
-    }
-
-    /**
-     * Envia anexos da mensagem se existir.
-     *
-     * @return object
-     */
-    public function attachments(array $data): object
-    {
-        // code...,
-        return $this;
     }
 
     /**
@@ -58,7 +56,6 @@ abstract class Notification implements NotificationInterface
      */
     public function send(): bool
     {
-        // code...
-        return false;
+        return $this->request($this->method, $this->end_point, $this->data);
     }
 }

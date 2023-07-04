@@ -9,7 +9,7 @@ interface NotificationInterface
      *
      * @return array
      */
-    public function text(string $message): object;
+    public function text(): object;
 
     /**
      * Coleta os anexos da mensagem se existir.

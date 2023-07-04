@@ -3,18 +3,13 @@
 namespace ForWebSystem\NotificationWhatsApp\Traits;
 
 use GuzzleHttp\Client;
-use Illuminate\Support\Facades\Log;
 
 trait RequestTrait
 {
-    private function __construct()
-    {
-    }
-
-    private function request(string $method, string $endPoint, array $data)
+    private function request(string $method, string $url, array $data)
     {
         $content = '';
-        $status = '200';
+        $status = http_response_code(200);
         try {
             $options = [
                 'body' => json_encode($data),
@@ -24,22 +19,17 @@ trait RequestTrait
             ];
 
             $cliente = new Client();
-            $response = $cliente->request($method, "{$this->url}/{$endPoint}", $options);
-            $content = json_decode($response->getBody()->getContents(), true);
+            $response = $cliente->request($method, $url, $options);
 
-            return $content;
+            return json_decode($response->getBody()->getContents(), true);
         } catch (\GuzzleHttp\Exception\ClientException $e) {
             $content = $e->getResponse()->getBody()->getContents();
-            $content = !empty($content) ? $content : $e->getMessage();
             $result = json_decode($content);
-
-            $status = $result->status ?? '500';
-            $message = $result->message ?? '';
-            $error = $result->error ?? '';
+            $status = $result->status ?? http_response_code(500);
 
             throw new ClientException($content, $e->getCode(), $e);
-        } finally {
-            $this->saveLog($method, $status, $endPoint, $data, $content);
-        }
+        } /*finally {
+            $this->saveLog($method, $status, $url, $data, $content);
+        }*/
     }
 }
