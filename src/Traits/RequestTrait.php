@@ -3,33 +3,27 @@
 namespace ForWebSystem\NotificationWhatsApp\Traits;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
 
 trait RequestTrait
 {
-    private function request(string $method, string $url, array $data)
+    public function makeHttpRequest($method, $url, $headers = [], $body = null)
     {
-        $content = '';
-        $status = http_response_code(200);
+        $client = new Client();
+
         try {
-            $options = [
-                'body' => json_encode($data),
-                'headers' => [
-                    'Content-Type' => 'application/json'
-                ]
-            ];
+            $response = $client->request($method, $url, [
+                'headers' => $headers,
+                'body' => $body,
+            ]);
 
-            $cliente = new Client();
-            $response = $cliente->request($method, $url, $options);
+            return $response->getBody()->getContents();
+        } catch (RequestException $e) {
+            if ($e->hasResponse()) {
+                return $e->getResponse()->getBody()->getContents();
+            }
 
-            return json_decode($response->getBody()->getContents(), true);
-        } catch (\GuzzleHttp\Exception\ClientException $e) {
-            $content = $e->getResponse()->getBody()->getContents();
-            $result = json_decode($content);
-            $status = $result->status ?? http_response_code(500);
-
-            throw new ClientException($content, $e->getCode(), $e);
-        } /*finally {
-            $this->saveLog($method, $status, $url, $data, $content);
-        }*/
+            return $e->getMessage();
+        }
     }
 }
