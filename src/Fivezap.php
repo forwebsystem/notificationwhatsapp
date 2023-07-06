@@ -2,6 +2,9 @@
 
 namespace ForWebSystem\NotificationWhatsApp;
 
+use ForWebSystem\NotificationWhatsApp\Contracts\SenderInterface as Sender;
+use ForWebSystem\NotificationWhatsApp\Contracts\ReceiverInterface as Receiver;
+
 class Fivezap extends Notification
 {
     /**
@@ -9,47 +12,55 @@ class Fivezap extends Notification
      *
      * @var string
      */
-    private string $host = 'https://chat.fivezap.com.br/api/v1';
+    private string $host = $_ENV['FIVEZAP_HOST'];
 
     /**
-     * ID do usuario na API.
+     * Versao da API.
      *
-     * @var integer
+     * @var string
      */
-    private int $account_id;
+    private string $api_version = $_ENV['FIVEZAP_API_VERSION'];
 
     /**
-     * ID da conversação atual na API.
+     * ID da conversação atual.
      *
      * @var integer
      */
     private int $conversation_id;
 
-    /**
-     * Token do usuario na API.
-     *
-     * @var string
-     */
-    private string $token;
 
     /**
      * Tipo do serviço que está sendo utilizado.
      *
      * @var string
      */
-    private string $service;
+    private string $service = 'fivezap';
 
-    public function __construct(
-        int $account_id,
-        string $token,
-        string $content,
-        string $service = 'fivezap'
-    ) {
-        $this->token = $token;
-        $this->account_id = $account_id;
-        $this->service = $service;
+    /**
+     * Objeto contendo o Remetente.
+     *
+     * @var Sender
+     */
+    private Sender $sender;
 
-        parent::__construct($content);
+    /**
+     * Objeto contendo o destinatário.
+     *
+     * @var Receiver
+     */
+    private Receiver $receiver;
+
+    public function __construct(Sender $sender, Receiver $receiver)
+    {
+        /*
+        IMPLEMENTAR VALIDAÇÃO DE VARIAVEIS DO ENV.
+        
+        if(!isset($_ENV['FIVEZAP_HOST'])) {}
+        if(!isset($_ENV['FIVEZAP_API_VERSION'])) {}
+        */
+
+        $this->sender = $sender;
+        $this->receiver = $receiver;
     }
 
     /**
@@ -60,10 +71,7 @@ class Fivezap extends Notification
     public function text(): object
     {
         $this->method = 'POST';
-        $this->end_point = "$this->host/accounts/$this->account_id/conversations/$this->conversation_id/messages";
-
-        $this->data['content'] = $this->content;
-        $this->data['message_type'] = 'outgoing';
+        $this->end_point = "$this->host/accounts/{$this->sender->account()}/conversations/$this->conversation_id/messages";
 
         return $this;
     }
@@ -77,5 +85,12 @@ class Fivezap extends Notification
     {
         // code...,
         return $this;
+    }
+
+    public function searchContact(string $param)
+    {
+        // Busca um contato pelo name, identifier, email ou phone number
+        $this->method = 'POST';
+        $this->end_point = "$this->host/$this->api_version/accounts/{$this->sender->account()}/contacts/search?q={$param}";
     }
 }
