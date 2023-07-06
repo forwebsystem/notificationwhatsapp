@@ -10,18 +10,11 @@ abstract class Notification implements NotificationInterface
     use RequestTrait;
 
     /**
-     * Tipo do serviço a ser utilizado.
-     *
-     * @var string
-     */
-    protected string $service;
-
-    /**
      * Conteudo da mensagem.
      *
      * @var string
      */
-    protected string $content = null;
+    protected string $content = '';
 
     /**
      * Metodo para a requisição atual.

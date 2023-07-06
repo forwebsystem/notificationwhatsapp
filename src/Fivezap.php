@@ -12,14 +12,16 @@ class Fivezap extends Notification
      *
      * @var string
      */
-    private string $host = $_ENV['FIVEZAP_HOST'];
+    //private string $host = $_ENV['FIVEZAP_HOST'] ?? 'http://localhost:3000';
+    private string $host = 'http://localhost:3000';
 
     /**
      * Versao da API.
      *
      * @var string
      */
-    private string $api_version = $_ENV['FIVEZAP_API_VERSION'];
+    //private string $api_version = $_ENV['FIVEZAP_API_VERSION'] ?? 'api/v1';
+    private string $api_version = 'api/v1';
 
     /**
      * ID da conversação atual.
@@ -27,7 +29,6 @@ class Fivezap extends Notification
      * @var integer
      */
     private int $conversation_id;
-
 
     /**
      * Tipo do serviço que está sendo utilizado.
@@ -48,13 +49,13 @@ class Fivezap extends Notification
      *
      * @var Receiver
      */
-    private Receiver $receiver;
+    protected Receiver $receiver;
 
     public function __construct(Sender $sender, Receiver $receiver)
     {
         /*
         IMPLEMENTAR VALIDAÇÃO DE VARIAVEIS DO ENV.
-        
+
         if(!isset($_ENV['FIVEZAP_HOST'])) {}
         if(!isset($_ENV['FIVEZAP_API_VERSION'])) {}
         */
