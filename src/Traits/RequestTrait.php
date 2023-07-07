@@ -51,7 +51,7 @@ trait RequestTrait
                 $this->url,
                 [
                     'headers' => $this->headers,
-                    'body' => $this->body,
+                    'body' => json_encode($this->body),
                 ]
             );
 

@@ -2,11 +2,12 @@
 
 namespace ForWebSystem\NotificationWhatsApp;
 
+use ForWebSystem\NotificationWhatsApp\Contracts\FivezapInterface;
+use ForWebSystem\NotificationWhatsApp\Traits\RequestTrait;
 use ForWebSystem\NotificationWhatsApp\Contracts\SenderInterface as Sender;
 use ForWebSystem\NotificationWhatsApp\Contracts\ReceiverInterface as Receiver;
-use ForWebSystem\NotificationWhatsApp\Traits\RequestTrait;
 
-class Fivezap
+class Fivezap implements FivezapInterface
 {
     use RequestTrait;
 
@@ -178,5 +179,30 @@ class Fivezap
         }
 
         return $payload;
+    }
+
+    public function createContact()
+    {
+        $this->method = 'POST';
+        $this->end_point = "/accounts/$this->account_id/contacts";
+        $this->url = $this->host . $this->api_version . $this->end_point;
+
+        $this->headers =
+        [
+            'Content-Type' => 'application/json',
+            'api_access_token' => $this->token
+        ];
+
+        $this->body =
+        [
+            'name' => $this->receiver_name,
+            'inbox_id' => $this->inbox,
+            'source_id' => $this->receiver_phone,
+            'phone_number' => $this->receiver_phone,
+            'email' => $this->receiver_email
+        ];
+
+        $response = $this->makeHttpRequest();
+        return $response;
     }
 }
