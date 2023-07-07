@@ -54,9 +54,8 @@ class Fivezap extends Notification
     /**
      * Contato encontrado no metodo searchContact().
      *
-     * @var object
      */
-    private object $contact = null;
+    private object $contact;
 
     public function __construct(Sender $sender, Receiver $receiver)
     {
@@ -114,22 +113,22 @@ class Fivezap extends Notification
             'api_access_token' => $this->sender->token()
         ];
 
-        $result = $this->makeHttpRequest(
+        $response = $this->makeHttpRequest(
             $this->method,
             $this->host . $this->api_version . $this->end_point,
             $this->headers,
             $this->body
         );
 
-        $data = json_decode($result, true);
-        $meta = $data['meta'];
-        $payload = $data['payload'];
-        $contact = (object) $payload[0];
+        $meta = $response['meta'];
+        $payload = $response['payload'];
 
         if ($meta['count'] == 1) {
-            $this->contact = $contact;
+            $this->contact = json_decode(json_encode($payload[0]), false);
+
+            return $this->contact;
         }
 
-        return $contact;
+        return $payload;
     }
 }

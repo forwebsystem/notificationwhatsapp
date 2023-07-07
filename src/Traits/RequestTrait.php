@@ -17,7 +17,8 @@ trait RequestTrait
                 'body' => $body,
             ]);
 
-            return $response->getBody()->getContents();
+            $response = $response->getBody()->getContents();
+            return json_decode($response, true);
         } catch (RequestException $e) {
             if ($e->hasResponse()) {
                 return $e->getResponse()->getBody()->getContents();
