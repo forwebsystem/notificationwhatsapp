@@ -4,9 +4,12 @@ namespace ForWebSystem\NotificationWhatsApp;
 
 use ForWebSystem\NotificationWhatsApp\Contracts\SenderInterface as Sender;
 use ForWebSystem\NotificationWhatsApp\Contracts\ReceiverInterface as Receiver;
+use ForWebSystem\NotificationWhatsApp\Traits\RequestTrait;
 
-class Fivezap extends Notification
+class Fivezap
 {
+    use RequestTrait;
+
     /**
      * Url da API.
      *
@@ -23,12 +26,46 @@ class Fivezap extends Notification
     //private string $api_version = $_ENV['FIVEZAP_API_VERSION'] ?? 'api/v1';
     private string $api_version = 'api/v1';
 
+    /**
+     * Token da conta no FiveZap.
+     *
+     * @var string
+     */
     private string $token = '';
+
+    /**
+     * ID da conta no FiveZap.
+     *
+     * @var integer
+     */
     private int $account_id;
+
+    /**
+     * ID da caixa de entrada no FiveZap.
+     *
+     * @var integer
+     */
     private int $inbox;
 
+    /**
+     * Nome do destinatário.
+     *
+     * @var string
+     */
     private string $receiver_name = '';
+
+    /**
+     * Email do destinatário.
+     *
+     * @var string
+     */
     private string $receiver_email = '';
+
+    /**
+     * Telefone do destinatário.
+     *
+     * @var string
+     */
     private string $receiver_phone = '';
 
     /**
@@ -121,6 +158,7 @@ class Fivezap extends Notification
 
         $this->method = 'GET';
         $this->end_point = "/accounts/$this->account_id/contacts/search?q={$value}";
+        $this->url = $this->host . $this->api_version . $this->end_point;
 
         $this->headers =
         [
@@ -128,12 +166,7 @@ class Fivezap extends Notification
             'api_access_token' => $this->token
         ];
 
-        $response = $this->makeHttpRequest(
-            $this->method,
-            $this->host . $this->api_version . $this->end_point,
-            $this->headers,
-            $this->body
-        );
+        $response = $this->makeHttpRequest();
 
         $meta = $response['meta'];
         $payload = $response['payload'];

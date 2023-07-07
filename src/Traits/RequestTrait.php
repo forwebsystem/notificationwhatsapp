@@ -12,14 +12,21 @@ trait RequestTrait
      *
      * @var string
      */
-    protected string $method;
+    protected string $method = '';
 
     /**
-     * Endpoint a ser acessado.
+     * Endpoint.
      *
      * @var string
      */
-    protected string $end_point;
+    protected string $end_point = '';
+
+    /**
+     * Url.
+     *
+     * @var string
+     */
+    protected string $url = '';
 
     /**
      * Headers da requisição atual.
@@ -34,15 +41,19 @@ trait RequestTrait
      */
     protected $body = null;
 
-    public function makeHttpRequest($method, $url, $headers = [], $body = null)
+    public function makeHttpRequest()
     {
         $client = new Client();
 
         try {
-            $response = $client->request($method, $url, [
-                'headers' => $headers,
-                'body' => $body,
-            ]);
+            $response = $client->request(
+                $this->method,
+                $this->url,
+                [
+                    'headers' => $this->headers,
+                    'body' => $this->body,
+                ]
+            );
 
             $response = $response->getBody()->getContents();
             return json_decode($response, true);
