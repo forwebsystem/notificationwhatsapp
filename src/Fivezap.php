@@ -23,6 +23,14 @@ class Fivezap extends Notification
     //private string $api_version = $_ENV['FIVEZAP_API_VERSION'] ?? 'api/v1';
     private string $api_version = 'api/v1';
 
+    private string $token = '';
+    private int $account_id;
+    private int $inbox;
+
+    private string $receiver_name = '';
+    private string $receiver_email = '';
+    private string $receiver_phone = '';
+
     /**
      * ID da conversação atual.
      *
@@ -52,7 +60,7 @@ class Fivezap extends Notification
     protected Receiver $receiver;
 
     /**
-     * Contato encontrado no metodo searchContact().
+     * Contato buscado na API pelo método searchContact().
      *
      */
     private object $contact;
@@ -66,8 +74,15 @@ class Fivezap extends Notification
         if(!isset($_ENV['FIVEZAP_API_VERSION'])) {}
         */
 
-        $this->sender = $sender;
-        $this->receiver = $receiver;
+        // Preenche propriedades do remetente.
+        $this->token = $sender->token();
+        $this->account_id = $sender->account();
+        $this->inbox = $sender->inbox();
+
+        // Preenche propriedades do destinatário.
+        $this->receiver_name = $receiver->name();
+        $this->receiver_email = $receiver->email();
+        $this->receiver_phone = $receiver->phone();
     }
 
     /**
@@ -78,7 +93,7 @@ class Fivezap extends Notification
     public function text(): object
     {
         $this->method = 'POST';
-        $this->end_point = "/accounts/{$this->sender->account()}/conversations/$this->conversation_id/messages";
+        $this->end_point = "/accounts/$this->account_id/conversations/$this->conversation_id/messages";
 
         return $this;
     }
@@ -102,15 +117,15 @@ class Fivezap extends Notification
      */
     public function searchContact(string $param = null)
     {
-        $value = $param ?? $this->receiver->phone();
+        $value = $param ?? $this->receiver_phone;
 
         $this->method = 'GET';
-        $this->end_point = "/accounts/{$this->sender->account()}/contacts/search?q={$value}";
+        $this->end_point = "/accounts/$this->account_id/contacts/search?q={$value}";
 
         $this->headers =
         [
             'Content-Type' => 'application/json',
-            'api_access_token' => $this->sender->token()
+            'api_access_token' => $this->token
         ];
 
         $response = $this->makeHttpRequest(
