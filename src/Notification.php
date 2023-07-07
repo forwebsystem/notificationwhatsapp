@@ -31,6 +31,19 @@ abstract class Notification implements NotificationInterface
     protected string $end_point;
 
     /**
+     * Headers da requisição atual.
+     *
+     * @var array
+     */
+    protected array $headers = [];
+
+    /**
+     * Body da requisição atual.
+     *
+     */
+    protected $body = null;
+
+    /**
      * Array de dados a ser usado na requisição.
      *
      * @var array

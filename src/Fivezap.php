@@ -13,7 +13,7 @@ class Fivezap extends Notification
      * @var string
      */
     //private string $host = $_ENV['FIVEZAP_HOST'] ?? 'http://localhost:3000';
-    private string $host = 'http://localhost:3000';
+    private string $host = 'http://localhost:3000/';
 
     /**
      * Versao da API.
@@ -51,6 +51,13 @@ class Fivezap extends Notification
      */
     protected Receiver $receiver;
 
+    /**
+     * Contato encontrado no metodo searchContact().
+     *
+     * @var object
+     */
+    private object $contact = null;
+
     public function __construct(Sender $sender, Receiver $receiver)
     {
         /*
@@ -72,7 +79,7 @@ class Fivezap extends Notification
     public function text(): object
     {
         $this->method = 'POST';
-        $this->end_point = "$this->host/accounts/{$this->sender->account()}/conversations/$this->conversation_id/messages";
+        $this->end_point = "/accounts/{$this->sender->account()}/conversations/$this->conversation_id/messages";
 
         return $this;
     }
@@ -88,10 +95,41 @@ class Fivezap extends Notification
         return $this;
     }
 
-    public function searchContact(string $param)
+    /**
+     * Busca um contato pelo name, identifier, email ou phone number
+     *
+     * @param string $param
+     * @return object
+     */
+    public function searchContact(string $param = null)
     {
-        // Busca um contato pelo name, identifier, email ou phone number
-        $this->method = 'POST';
-        $this->end_point = "$this->host/$this->api_version/accounts/{$this->sender->account()}/contacts/search?q={$param}";
+        $value = $param ?? $this->receiver->phone();
+
+        $this->method = 'GET';
+        $this->end_point = "/accounts/{$this->sender->account()}/contacts/search?q={$value}";
+
+        $this->headers =
+        [
+            'Content-Type' => 'application/json',
+            'api_access_token' => $this->sender->token()
+        ];
+
+        $result = $this->makeHttpRequest(
+            $this->method,
+            $this->host . $this->api_version . $this->end_point,
+            $this->headers,
+            $this->body
+        );
+
+        $data = json_decode($result, true);
+        $meta = $data['meta'];
+        $payload = $data['payload'];
+        $contact = (object) $payload[0];
+
+        if ($meta['count'] == 1) {
+            $this->contact = $contact;
+        }
+
+        return $contact;
     }
 }
