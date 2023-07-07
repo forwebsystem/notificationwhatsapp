@@ -17,33 +17,6 @@ abstract class Notification implements NotificationInterface
     protected string $content = '';
 
     /**
-     * Metodo para a requisição atual.
-     *
-     * @var string
-     */
-    protected string $method;
-
-    /**
-     * Endpoint a ser acessado.
-     *
-     * @var string
-     */
-    protected string $end_point;
-
-    /**
-     * Headers da requisição atual.
-     *
-     * @var array
-     */
-    protected array $headers = [];
-
-    /**
-     * Body da requisição atual.
-     *
-     */
-    protected $body = null;
-
-    /**
      * Array de dados a ser usado na requisição.
      *
      * @var array
