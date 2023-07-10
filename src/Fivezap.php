@@ -7,6 +7,8 @@ use ForWebSystem\NotificationWhatsApp\Traits\RequestTrait;
 use ForWebSystem\NotificationWhatsApp\Contracts\SenderInterface as Sender;
 use ForWebSystem\NotificationWhatsApp\Contracts\ReceiverInterface as Receiver;
 
+use function PHPUnit\Framework\isEmpty;
+
 class Fivezap implements FivezapInterface
 {
     use RequestTrait;
@@ -128,7 +130,7 @@ class Fivezap implements FivezapInterface
      *
      * @return object
      */
-    public function text(): object
+    public function text(string $message): object
     {
         $this->method = 'POST';
         $this->end_point = "/accounts/$this->account_id/conversations/$this->conversation_id/messages";
@@ -151,7 +153,7 @@ class Fivezap implements FivezapInterface
      * Busca um contato pelo name, identifier, email ou phone number
      *
      * @param string $param
-     * @return object
+     * @return array|object
      */
     public function searchContact(string $param = null)
     {
@@ -172,8 +174,8 @@ class Fivezap implements FivezapInterface
         $meta = $response['meta'];
         $payload = $response['payload'];
 
-        if ($meta['count'] == 1) {
-            $this->contact = json_decode(json_encode($payload[0]), false);
+        if ($meta['count'] == 1 && $payload) {
+            $this->contact = $this->toObject($payload[0]);
 
             return $this->contact;
         }
@@ -181,6 +183,11 @@ class Fivezap implements FivezapInterface
         return $payload;
     }
 
+    /**
+     * Cria novo contato.
+     *
+     * @return object
+     */
     public function createContact()
     {
         $this->method = 'POST';
@@ -204,5 +211,16 @@ class Fivezap implements FivezapInterface
 
         $response = $this->makeHttpRequest();
         return $response;
+    }
+
+    /**
+     * Converte array para objeto.
+     *
+     * @param array $array
+     * @return void
+     */
+    public function toObject(array $array)
+    {
+        return json_decode(json_encode($array), false);
     }
 }
