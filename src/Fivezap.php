@@ -7,8 +7,6 @@ use ForWebSystem\NotificationWhatsApp\Traits\RequestTrait;
 use ForWebSystem\NotificationWhatsApp\Contracts\SenderInterface as Sender;
 use ForWebSystem\NotificationWhatsApp\Contracts\ReceiverInterface as Receiver;
 
-use function PHPUnit\Framework\isEmpty;
-
 class Fivezap implements FivezapInterface
 {
     use RequestTrait;
@@ -79,6 +77,13 @@ class Fivezap implements FivezapInterface
     private int $conversation_id;
 
     /**
+     * Conversação do contato.
+     *
+     * @var object
+     */
+    private object $conversation;
+
+    /**
      * Tipo do serviço que está sendo utilizado.
      *
      * @var string
@@ -113,40 +118,16 @@ class Fivezap implements FivezapInterface
         if(!isset($_ENV['FIVEZAP_HOST'])) {}
         if(!isset($_ENV['FIVEZAP_API_VERSION'])) {}
         */
-
+        
         // Preenche propriedades do remetente.
         $this->token = $sender->token();
         $this->account_id = $sender->account();
         $this->inbox = $sender->inbox();
-
+        
         // Preenche propriedades do destinatário.
         $this->receiver_name = $receiver->name();
         $this->receiver_email = $receiver->email();
         $this->receiver_phone = $receiver->phone();
-    }
-
-    /**
-     * Coleta a mensagem de texto.
-     *
-     * @return object
-     */
-    public function text(string $message): object
-    {
-        $this->method = 'POST';
-        $this->end_point = "/accounts/$this->account_id/conversations/$this->conversation_id/messages";
-
-        return $this;
-    }
-
-    /**
-     * Envia anexos da mensagem se existir.
-     *
-     * @return object
-     */
-    public function attachments(array $data): object
-    {
-        // code...,
-        return $this;
     }
 
     /**
@@ -176,11 +157,9 @@ class Fivezap implements FivezapInterface
 
         if ($meta['count'] == 1 && $payload) {
             $this->contact = $this->toObject($payload[0]);
-
-            return $this->contact;
         }
-
-        return $payload;
+        
+        return $this;
     }
 
     /**
@@ -210,7 +189,39 @@ class Fivezap implements FivezapInterface
         ];
 
         $response = $this->makeHttpRequest();
-        return $response;
+        $payload = $response['payload'];
+        $this->contact = $this->toObject($payload['contact']);
+
+        return $this->contact;
+    }
+
+    /**
+     * Busca conversação atual do contato.
+     *
+     * @return void
+     */
+    public function getContactConversation()
+    {
+        $this->method = 'GET';
+        $this->end_point = "/accounts/{$this->account_id}/contacts/{$this->contact->id}/conversations";
+        $this->url = $this->host . $this->api_version . $this->end_point;
+
+        $this->headers =
+        [
+            'Content-Type' => 'application/json',
+            'api_access_token' => $this->token
+        ];
+
+        $response = $this->makeHttpRequest();
+        $conversations = $response['payload'];
+
+        // filtra array de conversação e pega a conversação da inbox.
+        $conversation = array_filter($conversations, fn($el) => (
+            ($el['inbox_id'] == $this->inbox) && ($el['status'] == 'open')
+        ));
+
+        $this->conversation = $this->toObject($conversation);
+        return $this;
     }
 
     /**
