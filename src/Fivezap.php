@@ -136,18 +136,7 @@ class Fivezap implements FivezapInterface
             'api_access_token' => $this->token
         ];
 
-        $this->prepare();
-    }
-
-    /**
-     * Busca todos os dados necessários e preenche propriedades.
-     *
-     * @return void
-     */
-    public function prepare()
-    {
         $this->searchContact();
-        $this->getContactConversation();
     }
 
 
@@ -159,6 +148,9 @@ class Fivezap implements FivezapInterface
      */
     public function message(string $message)
     {
+        // Se ainda não existe uma conversação, busca uma aberta ou cria nova.
+        $this->getContactConversation();
+
         $this->method = 'POST';
         $this->end_point = "/accounts/$this->account_id/conversations/{$this->conversation->id}/messages";
         $this->url = $this->host . $this->api_version . $this->end_point;
@@ -195,7 +187,8 @@ class Fivezap implements FivezapInterface
 
         if ($meta['count'] == 1 && $payload) {
             $this->contact = $this->toObject($payload[0]);
-
+            $this->getContactConversation();
+            
             return $this;
         }
 
@@ -228,6 +221,7 @@ class Fivezap implements FivezapInterface
 
         if($payload) {
             $this->contact = $this->toObject($payload['contact']);
+            $this->createConversation();
         }
 
         return $this;
@@ -254,7 +248,41 @@ class Fivezap implements FivezapInterface
         
         $conversation = reset($result);
 
-        $this->conversation = $this->toObject($conversation);
+        if($conversation) {
+            $this->conversation = $this->toObject($conversation);
+
+            return $this;
+        }
+
+        $this->createConversation();
+        return $this;
+    }
+
+    /**
+     * Cria uma nova conversação com status open.
+     *
+     * @return void
+     */
+    public function createConversation()
+    {
+        $this->method = 'POST';
+        $this->end_point = "/accounts/{$this->account_id}/conversations";
+        $this->url = $this->host . $this->api_version . $this->end_point;
+
+        $this->body =
+        [
+            "source_id"=> $this->contact->phone_number,
+            'inbox_id' => $this->inbox,
+            "contact_id"=> $this->contact->id,
+            "status" => "open"
+        ];
+
+        $conversation = $this->makeHttpRequest();
+
+        if($conversation) {
+            $this->conversation = $this->toObject($conversation);
+        }
+
         return $this;
     }
 
