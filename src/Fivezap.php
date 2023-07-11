@@ -6,6 +6,7 @@ use ForWebSystem\NotificationWhatsApp\Contracts\FivezapInterface;
 use ForWebSystem\NotificationWhatsApp\Traits\RequestTrait;
 use ForWebSystem\NotificationWhatsApp\Contracts\SenderInterface as Sender;
 use ForWebSystem\NotificationWhatsApp\Contracts\ReceiverInterface as Receiver;
+use Spatie\Async\Pool;
 
 class Fivezap implements FivezapInterface
 {
@@ -128,6 +129,48 @@ class Fivezap implements FivezapInterface
         $this->receiver_name = $receiver->name();
         $this->receiver_email = $receiver->email();
         $this->receiver_phone = $receiver->phone();
+        $this->prepare();
+    }
+
+    /**
+     * Busca todos os dados necessários e preenche propriedades.
+     *
+     * @return void
+     */
+    public function prepare()
+    {
+        $this->searchContact();
+        $this->getContactConversation();
+    }
+
+
+    /**
+     * Envia mensagem de texto.
+     *
+     * @param string $message
+     * @return void
+     */
+    public function message(string $message)
+    {
+        $this->method = 'POST';
+        $this->end_point = "/accounts/$this->account_id/conversations/{$this->conversation->id}/messages";
+        $this->url = $this->host . $this->api_version . $this->end_point;
+
+        $this->headers =
+        [
+            'Content-Type' => 'application/json',
+            'api_access_token' => $this->token
+        ];
+
+        $this->body = 
+        [
+            "content" => $message,
+            "message_type" => "outgoing"
+        ];
+
+        $response = $this->makeHttpRequest();
+        return $response;
+        
     }
 
     /**
@@ -216,9 +259,11 @@ class Fivezap implements FivezapInterface
         $conversations = $response['payload'];
 
         // filtra array de conversação e pega a conversação da inbox.
-        $conversation = array_filter($conversations, fn($el) => (
+        $result = array_filter($conversations, fn($el) => (
             ($el['inbox_id'] == $this->inbox) && ($el['status'] == 'open')
         ));
+        
+        $conversation = reset($result);
 
         $this->conversation = $this->toObject($conversation);
         return $this;
