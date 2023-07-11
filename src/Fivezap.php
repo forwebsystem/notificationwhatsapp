@@ -6,7 +6,6 @@ use ForWebSystem\NotificationWhatsApp\Contracts\FivezapInterface;
 use ForWebSystem\NotificationWhatsApp\Traits\RequestTrait;
 use ForWebSystem\NotificationWhatsApp\Contracts\SenderInterface as Sender;
 use ForWebSystem\NotificationWhatsApp\Contracts\ReceiverInterface as Receiver;
-use Spatie\Async\Pool;
 
 class Fivezap implements FivezapInterface
 {
@@ -129,6 +128,14 @@ class Fivezap implements FivezapInterface
         $this->receiver_name = $receiver->name();
         $this->receiver_email = $receiver->email();
         $this->receiver_phone = $receiver->phone();
+
+        // cabeçalho para todas as requisições da trait.
+        $this->headers =
+        [
+            'Content-Type' => 'application/json',
+            'api_access_token' => $this->token
+        ];
+
         $this->prepare();
     }
 
@@ -156,12 +163,6 @@ class Fivezap implements FivezapInterface
         $this->end_point = "/accounts/$this->account_id/conversations/{$this->conversation->id}/messages";
         $this->url = $this->host . $this->api_version . $this->end_point;
 
-        $this->headers =
-        [
-            'Content-Type' => 'application/json',
-            'api_access_token' => $this->token
-        ];
-
         $this->body = 
         [
             "content" => $message,
@@ -177,7 +178,7 @@ class Fivezap implements FivezapInterface
      * Busca um contato pelo name, identifier, email ou phone number
      *
      * @param string $param
-     * @return array|object
+     * @return object
      */
     public function searchContact(string $param = null)
     {
@@ -187,12 +188,6 @@ class Fivezap implements FivezapInterface
         $this->end_point = "/accounts/$this->account_id/contacts/search?q={$value}";
         $this->url = $this->host . $this->api_version . $this->end_point;
 
-        $this->headers =
-        [
-            'Content-Type' => 'application/json',
-            'api_access_token' => $this->token
-        ];
-
         $response = $this->makeHttpRequest();
 
         $meta = $response['meta'];
@@ -200,8 +195,11 @@ class Fivezap implements FivezapInterface
 
         if ($meta['count'] == 1 && $payload) {
             $this->contact = $this->toObject($payload[0]);
+
+            return $this;
         }
-        
+
+        $this->createContact();
         return $this;
     }
 
@@ -216,12 +214,6 @@ class Fivezap implements FivezapInterface
         $this->end_point = "/accounts/$this->account_id/contacts";
         $this->url = $this->host . $this->api_version . $this->end_point;
 
-        $this->headers =
-        [
-            'Content-Type' => 'application/json',
-            'api_access_token' => $this->token
-        ];
-
         $this->body =
         [
             'name' => $this->receiver_name,
@@ -233,9 +225,12 @@ class Fivezap implements FivezapInterface
 
         $response = $this->makeHttpRequest();
         $payload = $response['payload'];
-        $this->contact = $this->toObject($payload['contact']);
 
-        return $this->contact;
+        if($payload) {
+            $this->contact = $this->toObject($payload['contact']);
+        }
+
+        return $this;
     }
 
     /**
@@ -248,12 +243,6 @@ class Fivezap implements FivezapInterface
         $this->method = 'GET';
         $this->end_point = "/accounts/{$this->account_id}/contacts/{$this->contact->id}/conversations";
         $this->url = $this->host . $this->api_version . $this->end_point;
-
-        $this->headers =
-        [
-            'Content-Type' => 'application/json',
-            'api_access_token' => $this->token
-        ];
 
         $response = $this->makeHttpRequest();
         $conversations = $response['payload'];
