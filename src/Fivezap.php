@@ -16,16 +16,14 @@ class Fivezap implements FivezapInterface
      *
      * @var string
      */
-    //private string $host = $_ENV['FIVEZAP_HOST'] ?? 'http://localhost:3000';
-    private string $host = 'http://localhost:3000/';
+    private string $host = '';
 
     /**
      * Versao da API.
      *
      * @var string
      */
-    //private string $api_version = $_ENV['FIVEZAP_API_VERSION'] ?? 'api/v1';
-    private string $api_version = 'api/v1';
+    private string $api_version = '';
 
     /**
      * Token da conta no FiveZap.
@@ -110,14 +108,21 @@ class Fivezap implements FivezapInterface
      */
     private object $contact;
 
+    /**
+     * Guarda alguns erros que podem ocorrer.
+     *
+     * @var string
+     */
+    public string $errors;
+
     public function __construct(Sender $sender, Receiver $receiver)
     {
-        /*
-        IMPLEMENTAR VALIDAÇÃO DE VARIAVEIS DO ENV.
-
-        if(!isset($_ENV['FIVEZAP_HOST'])) {}
-        if(!isset($_ENV['FIVEZAP_API_VERSION'])) {}
-        */
+        if (!$this->checkEnv()) {
+            echo $this->errors; die;
+        }
+        
+        $this->host = $_ENV['FIVEZAP_HOST'];
+        $this->api_version = $_ENV['FIVEZAP_API_VERSION'];
         
         // Preenche propriedades do remetente.
         $this->token = $sender->token();
@@ -138,8 +143,7 @@ class Fivezap implements FivezapInterface
 
         $this->searchContact();
     }
-
-
+    
     /**
      * Envia mensagem de texto.
      *
@@ -284,6 +288,29 @@ class Fivezap implements FivezapInterface
         }
 
         return $this;
+    }
+
+    public function checkEnv()
+    {
+        $err = [];
+        // Verifica se existe host definido no arquivo .env.
+        if (!isset($_ENV['FIVEZAP_HOST'])) {
+            $exception = new \Exception('FIVEZAP_HOST não encontado no arquivo .env');
+            $err[] = $exception->getMessage();
+        }
+
+        // Verifica se existe a versão da api definida no arquivo .env.
+        if (!isset($_ENV['FIVEZAP_API_VERSION'])) {
+            $exception = new \Exception('FIVEZAP_API_VERSION não encontado no arquivo .env');
+            $err[] = $exception->getMessage();
+        }
+
+        if ($err) {
+            $this->errors = json_encode($err);
+            return false;
+        }
+
+        return true;
     }
 
     /**
