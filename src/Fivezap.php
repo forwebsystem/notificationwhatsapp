@@ -16,14 +16,16 @@ class Fivezap implements FivezapInterface
      *
      * @var string
      */
-    private string $host = '';
+    //private string $host = "";
+    private string $host = "http://localhost:3000/";
 
     /**
      * Versao da API.
      *
      * @var string
      */
-    private string $api_version = '';
+    //private string $api_version = '';
+    private string $api_version = 'api/v1';
 
     /**
      * Token da conta no FiveZap.
@@ -113,12 +115,12 @@ class Fivezap implements FivezapInterface
      *
      * @var string
      */
-    public string $errors;
+    private string $errors;
 
     public function __construct(Sender $sender, Receiver $receiver)
     {
         if (!$this->checkEnv()) {
-            echo $this->errors; die;
+            $this->getErrors(); die;
         }
         
         $this->host = $_ENV['FIVEZAP_HOST'];
@@ -311,6 +313,16 @@ class Fivezap implements FivezapInterface
         }
 
         return true;
+    }
+
+    /**
+     * Retorna erros.
+     *
+     * @return string
+     */
+    public function getErrors()
+    {
+        return $this->errors;
     }
 
     /**
