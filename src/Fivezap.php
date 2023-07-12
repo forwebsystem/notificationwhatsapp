@@ -118,7 +118,7 @@ class Fivezap implements FivezapInterface
     public function __construct(Sender $sender, Receiver $receiver)
     {
         if (!$this->checkEnv()) {
-            $this->getErrors(); die;
+            echo $this->getErrors(); die;
         }
         
         $this->host = $_ENV['FIVEZAP_HOST'];
