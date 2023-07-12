@@ -16,7 +16,6 @@ class Fivezap implements FivezapInterface
      *
      * @var string
      */
-    //private string $host = "";
     private string $host = "http://localhost:3000/";
 
     /**
@@ -24,7 +23,6 @@ class Fivezap implements FivezapInterface
      *
      * @var string
      */
-    //private string $api_version = '';
     private string $api_version = 'api/v1';
 
     /**
@@ -187,11 +185,10 @@ class Fivezap implements FivezapInterface
         $this->url = $this->host . $this->api_version . $this->end_point;
 
         $response = $this->makeHttpRequest();
-
-        $meta = $response['meta'];
-        $payload = $response['payload'];
-
-        if ($meta['count'] == 1 && $payload) {
+        
+        if (isset($response['meta']) && $response['meta']['count'] == 1) {
+            $meta = $response['meta'];
+            $payload = $response['payload'];
             $this->contact = $this->toObject($payload[0]);
             $this->getContactConversation();
             
@@ -223,10 +220,11 @@ class Fivezap implements FivezapInterface
         ];
 
         $response = $this->makeHttpRequest();
-        $payload = $response['payload'];
 
-        if($payload) {
+        if(isset($response['payload']) && $response['payload']) {
+            $payload = $response['payload'];
             $this->contact = $this->toObject($payload['contact']);
+            
             $this->createConversation();
         }
 
