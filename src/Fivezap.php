@@ -45,6 +45,13 @@ class Fivezap implements FivezapInterface
      * @var integer
      */
     private int $inbox;
+    
+    /**
+     * Identificador unico que vincula contact a inbox.
+     *
+     * @var string
+     */
+    private string $source_id;
 
     /**
      * Nome do destinatário.
@@ -117,12 +124,12 @@ class Fivezap implements FivezapInterface
 
     public function __construct(Sender $sender, Receiver $receiver)
     {
-        if (!$this->checkEnv()) {
-            echo $this->getErrors(); die;
-        }
+        // if (!$this->checkEnv()) {
+        //     echo $this->getErrors(); die;
+        // }
         
-        $this->host = $_ENV['FIVEZAP_HOST'];
-        $this->api_version = $_ENV['FIVEZAP_API_VERSION'];
+        // $this->host = $_ENV['FIVEZAP_HOST'];
+        // $this->api_version = $_ENV['FIVEZAP_API_VERSION'];
         
         // Preenche propriedades do remetente.
         $this->token = $sender->token();
@@ -153,7 +160,6 @@ class Fivezap implements FivezapInterface
     public function message(string $message)
     {
         // Se ainda não existe uma conversação, busca uma aberta ou cria nova.
-        $this->getContactConversation();
 
         $this->method = 'POST';
         $this->end_point = "/accounts/$this->account_id/conversations/{$this->conversation->id}/messages";
@@ -189,14 +195,16 @@ class Fivezap implements FivezapInterface
         if (isset($response['meta']) && $response['meta']['count'] == 1) {
             $meta = $response['meta'];
             $payload = $response['payload'];
+            $this->source_id = $payload[0]['contact_inboxes'][0]['source_id'];
             $this->contact = $this->toObject($payload[0]);
-            $this->getContactConversation();
+            if ($this->status_code == 200 && $response['meta']['count'] == 1) {
+                $this->getContactConversation();
+            }
             
-            return $this;
+            return $this->contact;
         }
 
-        $this->createContact();
-        return $this;
+        return $this->createContact();
     }
 
     /**
@@ -214,7 +222,6 @@ class Fivezap implements FivezapInterface
         [
             'name' => $this->receiver_name,
             'inbox_id' => $this->inbox,
-            'source_id' => $this->receiver_phone,
             'phone_number' => $this->receiver_phone,
             'email' => $this->receiver_email
         ];
@@ -223,12 +230,14 @@ class Fivezap implements FivezapInterface
 
         if(isset($response['payload']) && $response['payload']) {
             $payload = $response['payload'];
+            $this->source_id = $payload[0]['contact_inboxes'][0]['source_id'];
             $this->contact = $this->toObject($payload['contact']);
             
             $this->createConversation();
+            return $this->contact;
         }
 
-        return $this;
+        return $response;
     }
 
     /**
@@ -275,19 +284,18 @@ class Fivezap implements FivezapInterface
 
         $this->body =
         [
-            "source_id"=> $this->contact->phone_number,
-            'inbox_id' => $this->inbox,
-            "contact_id"=> $this->contact->id,
+            'source_id' => $this->source_id,
             "status" => "open"
         ];
 
-        $conversation = $this->makeHttpRequest();
+        $response = $this->makeHttpRequest();
 
-        if($conversation) {
-            $this->conversation = $this->toObject($conversation);
+        if($response) {
+            $this->conversation = $this->toObject($response);
+            return $this->conversation;
         }
 
-        return $this;
+        return $response;
     }
 
     public function checkEnv()

@@ -41,6 +41,13 @@ trait RequestTrait
      */
     protected $body = null;
 
+    /**
+     * Guarda status code da requisição.
+     *
+     * @var integer
+     */
+    public int $status_code;
+
     public function makeHttpRequest()
     {
         $client = new Client();
@@ -55,7 +62,9 @@ trait RequestTrait
                 ]
             );
 
+            $this->status_code = $response->getStatusCode();
             $response = $response->getBody()->getContents();
+            
             return json_decode($response, true);
         } catch (RequestException $e) {
             if ($e->hasResponse()) {
