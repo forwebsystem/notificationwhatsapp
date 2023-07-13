@@ -2,6 +2,7 @@
 
 namespace ForWebSystem\NotificationWhatsApp;
 
+use Exception;
 use ForWebSystem\NotificationWhatsApp\Contracts\FivezapInterface;
 use ForWebSystem\NotificationWhatsApp\Traits\RequestTrait;
 use ForWebSystem\NotificationWhatsApp\Contracts\SenderInterface as Sender;
@@ -160,19 +161,28 @@ class Fivezap implements FivezapInterface
     public function message(string $message)
     {
         // Se ainda não existe uma conversação, busca uma aberta ou cria nova.
+        try {
+            if (!isset($this->conversation)) {
+                throw new Exception('Ooops... erro ao se conectar com a API.');
+            }
 
-        $this->method = 'POST';
-        $this->end_point = "/accounts/$this->account_id/conversations/{$this->conversation->id}/messages";
-        $this->url = $this->host . $this->api_version . $this->end_point;
+            $this->method = 'POST';
+            $this->end_point = "/accounts/$this->account_id/conversations/{$this->conversation->id}/messages";
+            $this->url = $this->host . $this->api_version . $this->end_point;
 
-        $this->body = 
-        [
-            "content" => $message,
-            "message_type" => "outgoing"
-        ];
+            $this->body = 
+            [
+                "content" => $message,
+                "message_type" => "outgoing"
+            ];
 
-        $response = $this->makeHttpRequest();
-        return $response;
+            $response = $this->makeHttpRequest();
+
+            return $response;
+        } catch (Exception $e) {
+            return $e->getMessage();
+        }
+        
         
     }
 
