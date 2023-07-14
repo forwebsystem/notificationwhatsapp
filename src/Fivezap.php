@@ -124,10 +124,12 @@ class Fivezap implements FivezapInterface
 
     public function __construct(Sender $sender, Receiver $receiver)
     {
+        // verifica .env
         if (!$this->checkEnv()) {
             echo $this->getErrors(); die;
         }
         
+        // busca constantes do .env
         $this->host = $_ENV['FIVEZAP_HOST'];
         $this->api_version = $_ENV['FIVEZAP_API_VERSION'];
         
@@ -148,6 +150,7 @@ class Fivezap implements FivezapInterface
             'api_access_token' => $this->token
         ];
 
+        // busca ou cria contato em todas as requests.
         $this->searchContact();
     }
 
@@ -247,8 +250,8 @@ class Fivezap implements FivezapInterface
         ];
 
         $response = $this->makeHttpRequest();
-        //print_r($response['payload']); die;
 
+        // se contato existe, preebche atributos e retorna contato.
         if(isset($response['payload']) && $response['payload']) {
             $payload = $response['payload'];
             $this->source_id = $payload['contact']['contact_inboxes'][0]['source_id'];
@@ -257,6 +260,7 @@ class Fivezap implements FivezapInterface
             return $this->contact;
         }
 
+        // retorna contato buscado.
         return $response;
     }
 
@@ -295,9 +299,9 @@ class Fivezap implements FivezapInterface
     }
 
     /**
-     * Cria uma nova conversação com status open.
+     * Cria uma nova conversação com status pendig.
      *
-     * @return void
+     * @return object
      */
     public function createConversation()
     {
@@ -313,14 +317,21 @@ class Fivezap implements FivezapInterface
 
         $response = $this->makeHttpRequest();
 
+        // se criou corretamente preenche atributo e retorna.
         if($response) {
             $this->conversation = $this->toObject($response);
             return $this->conversation;
         }
 
+        // se encontrou retorna.
         return $response;
     }
 
+    /**
+     * Checa .env em busca das contantes do host e versão da Api.
+     *
+     * @return bool
+     */
     public function checkEnv()
     {
         $err = [];
