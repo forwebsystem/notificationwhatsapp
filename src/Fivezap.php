@@ -2,7 +2,6 @@
 
 namespace ForWebSystem\NotificationWhatsApp;
 
-use Exception;
 use ForWebSystem\NotificationWhatsApp\Contracts\FivezapInterface;
 use ForWebSystem\NotificationWhatsApp\Traits\RequestTrait;
 use ForWebSystem\NotificationWhatsApp\Contracts\SenderInterface as Sender;
@@ -125,12 +124,12 @@ class Fivezap implements FivezapInterface
 
     public function __construct(Sender $sender, Receiver $receiver)
     {
-        // if (!$this->checkEnv()) {
-        //     echo $this->getErrors(); die;
-        // }
+        if (!$this->checkEnv()) {
+            echo $this->getErrors(); die;
+        }
         
-        // $this->host = $_ENV['FIVEZAP_HOST'];
-        // $this->api_version = $_ENV['FIVEZAP_API_VERSION'];
+        $this->host = $_ENV['FIVEZAP_HOST'];
+        $this->api_version = $_ENV['FIVEZAP_API_VERSION'];
         
         // Preenche propriedades do remetente.
         $this->token = $sender->token();
@@ -151,38 +150,51 @@ class Fivezap implements FivezapInterface
 
         $this->searchContact();
     }
+
+    /**
+     *Verifica se atributos estão preenchidos.
+     *
+     * @return mixed
+     */
+    public function prepare()
+    {
+        try {
+
+            if (!isset($this->contact)) {
+                throw new \Exception('Oops... erro ao buscar contato, verifique os dados do destinatário..');
+            }
+
+            return $this;
+        } catch (Exception $e) {
+            return $e->getMessage();
+        }
+    }
     
     /**
      * Envia mensagem de texto.
      *
      * @param string $message
-     * @return void
+     * @return string|object
      */
     public function message(string $message)
     {
-        // Se ainda não existe uma conversação, busca uma aberta ou cria nova.
-        try {
-            if (!isset($this->conversation)) {
-                throw new Exception('Ooops... erro ao se conectar com a API.');
-            }
-
-            $this->method = 'POST';
-            $this->end_point = "/accounts/$this->account_id/conversations/{$this->conversation->id}/messages";
-            $this->url = $this->host . $this->api_version . $this->end_point;
-
-            $this->body = 
-            [
-                "content" => $message,
-                "message_type" => "outgoing"
-            ];
-
-            $response = $this->makeHttpRequest();
-
-            return $response;
-        } catch (Exception $e) {
-            return $e->getMessage();
+        // Busca uma conversação aberta ou cria nova.
+        if (!isset($this->conversation)) {
+            $this->getContactConversation();
         }
-        
+
+        $this->method = 'POST';
+        $this->end_point = "/accounts/$this->account_id/conversations/{$this->conversation->id}/messages";
+        $this->url = $this->host . $this->api_version . $this->end_point;
+
+        $this->body = 
+        [
+            "content" => $message,
+            "message_type" => "outgoing"
+        ];
+
+        $response = $this->makeHttpRequest();
+        return $response;
         
     }
 
@@ -202,14 +214,12 @@ class Fivezap implements FivezapInterface
 
         $response = $this->makeHttpRequest();
         
+        // contato encontrado, atribui a propriedades e busca conversação.
         if (isset($response['meta']) && $response['meta']['count'] == 1) {
             $meta = $response['meta'];
             $payload = $response['payload'];
             $this->source_id = $payload[0]['contact_inboxes'][0]['source_id'];
             $this->contact = $this->toObject($payload[0]);
-            if ($this->status_code == 200 && $response['meta']['count'] == 1) {
-                $this->getContactConversation();
-            }
             
             return $this->contact;
         }
@@ -237,13 +247,13 @@ class Fivezap implements FivezapInterface
         ];
 
         $response = $this->makeHttpRequest();
+        //print_r($response['payload']); die;
 
         if(isset($response['payload']) && $response['payload']) {
             $payload = $response['payload'];
-            $this->source_id = $payload[0]['contact_inboxes'][0]['source_id'];
+            $this->source_id = $payload['contact']['contact_inboxes'][0]['source_id'];
             $this->contact = $this->toObject($payload['contact']);
             
-            $this->createConversation();
             return $this->contact;
         }
 
@@ -269,14 +279,17 @@ class Fivezap implements FivezapInterface
             ($el['inbox_id'] == $this->inbox) && ($el['status'] == 'open')
         ));
         
+        // remove primeiro ponteiro do array.
         $conversation = reset($result);
 
+        // se o array nao for vazio atribui e retorna.
         if($conversation) {
             $this->conversation = $this->toObject($conversation);
 
             return $this;
         }
 
+        // se nao encontra uma conversação aberta, cria uma.
         $this->createConversation();
         return $this;
     }

@@ -64,7 +64,7 @@ trait RequestTrait
 
             $this->status_code = $response->getStatusCode();
             $response = $response->getBody()->getContents();
-            
+
             return json_decode($response, true);
         } catch (RequestException $e) {
             if ($e->hasResponse()) {
