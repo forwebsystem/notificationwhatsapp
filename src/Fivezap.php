@@ -178,7 +178,7 @@ class Fivezap implements FivezapInterface
      */
     public function message(string $message)
     {
-        // Busca uma conversação aberta ou cria nova.
+        // Se ainda não existe conversação, busca aberta ou cria nova.
         if (!isset($this->conversation)) {
             $this->getContactConversation();
         }
@@ -308,7 +308,7 @@ class Fivezap implements FivezapInterface
         $this->body =
         [
             'source_id' => $this->source_id,
-            "status" => "open"
+            "status" => "pending"
         ];
 
         $response = $this->makeHttpRequest();
