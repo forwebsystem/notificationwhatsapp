@@ -5,8 +5,11 @@ namespace ForWebSystem\NotificationWhatsApp\Http\Controllers;
 use App\User;
 use ForWebSystem\NotificationWhatsApp\Events\NotificationWhatsAppReceivedEvent;
 use ForWebSystem\NotificationWhatsApp\Model\NotificationWhatsAppReceived;
+use ForWebSystem\NotificationWhatsApp\Services\FivezapMessageService;
 use ForWebSystem\NotificationWhatsApp\Services\NotificacaoZApiMensagemReceived;
 use Illuminate\Routing\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class WebhookController extends Controller
 {
@@ -62,5 +65,27 @@ class WebhookController extends Controller
      */
     public function messageStatus()
     {
+    }
+
+    public function fivezapMessage(Request $request, FivezapMessageService $fivezap)
+    {
+        $method         = $request->method();
+        $url            = $request->url();
+        $message_type   = $request->message_type;
+        $account_id     = $request->account['id'];
+        $inbox_id       = $request->conversation['inbox_id'];
+        
+        if ($message_type == 'incoming') {
+            
+            // notificationwhatsapp_license = account no fivezap.
+            // notificationwhatsapp_token   = inbox no fivezap.
+            $user = User::where('notificationwhatsapp_license', $account_id)
+            ->where('notificationwhatsapp_token', $inbox_id)
+            ->first();
+
+            $notification = $fivezap->save($method, $url, $message_type, $request->all());
+            $fivezap_message = new NotificationWhatsAppReceived($notification->toArray());
+            event(new NotificationWhatsAppReceivedEvent($fivezap_message, $user));
+        }
     }
 }

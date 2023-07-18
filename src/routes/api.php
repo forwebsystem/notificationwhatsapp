@@ -20,8 +20,12 @@ Route::middleware('api', 'requestLog:whatsapp-api', 'requestValidation:whatsapp-
     ->namespace('ForWebSystem\NotificationWhatsApp\Http\Controllers')
     ->group(function () {
 
+        // Z-Api
         Route::post('webhook/{token}/delivery',         ['as' => 'webhook.delivery',        'uses' => 'WebhookController@delivery']);
         Route::post('webhook/{token}/disconnected',     ['as' => 'webhook.disconnected',    'uses' => 'WebhookController@disconnected']);
         Route::post('webhook/{token}/received',         ['as' => 'webhook.received',        'uses' => 'WebhookController@received']);
         Route::post('webhook/{token}/message-status',   ['as' => 'webhook.message-status',  'uses' => 'WebhookController@messageStatus']);
+
+        // Fivezap
+        Route::post('webhook/fivezap', 'WebhookController@fivezapMessage');
 });
