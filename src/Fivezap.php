@@ -135,14 +135,14 @@ class Fivezap implements FivezapInterface
         $this->api_version = $_ENV['FIVEZAP_API_VERSION'];
 
         // Preenche propriedades do remetente.
-        $this->token = $sender->token();
-        $this->account_id = $sender->account();
-        $this->inbox = $sender->inbox();
+        $this->token = $sender->getToken();
+        $this->account_id = $sender->getAccount();
+        $this->inbox = $sender->getInbox();
 
         // Preenche propriedades do destinatário.
-        $this->receiver_name = $receiver->name();
-        $this->receiver_email = $receiver->email();
-        $this->receiver_phone = $receiver->phone();
+        $this->receiver_name = $receiver->getName();
+        $this->receiver_email = $receiver->getEmail();
+        $this->receiver_phone = $receiver->getPhone();
 
         // cabeçalho para todas as requisições da trait.
         $this->headers =

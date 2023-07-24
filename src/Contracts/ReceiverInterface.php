@@ -9,19 +9,19 @@ interface ReceiverInterface
      *
      * @return string
      */
-    public function name(): string;
+    public function getName(): string;
 
     /**
      * Método que retorna o email do destinatário.
      *
      * @return string
      */
-    public function email(): string;
+    public function getEmail(): string;
 
     /**
      * Método que retorna o telefone do destinatário.
      *
      * @return string
      */
-    public function phone(): string;
+    public function getPhone(): string;
 }

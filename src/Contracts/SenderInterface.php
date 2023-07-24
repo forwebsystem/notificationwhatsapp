@@ -9,19 +9,19 @@ interface SenderInterface
      *
      * @return string
      */
-    public function token(): string;
+    public function getToken(): string;
 
     /**
      * Método responsável por fornecer o identificador da conta do usuário.
      *
      * @return integer
      */
-    public function account(): int;
+    public function getAccount(): int;
 
     /**
      * Método responsável por fornecer o id da caixa de entrada de destino.
      *
      * @return integer
      */
-    public function inbox(): int;
+    public function getInbox(): int;
 }
