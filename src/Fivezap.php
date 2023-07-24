@@ -6,6 +6,7 @@ use ForWebSystem\NotificationWhatsApp\Contracts\FivezapInterface;
 use ForWebSystem\NotificationWhatsApp\Traits\RequestTrait;
 use ForWebSystem\NotificationWhatsApp\Contracts\SenderInterface as Sender;
 use ForWebSystem\NotificationWhatsApp\Contracts\ReceiverInterface as Receiver;
+use ForWebSystem\NotificationWhatsApp\Exceptions\FivezapException;
 
 class Fivezap implements FivezapInterface
 {
@@ -115,21 +116,9 @@ class Fivezap implements FivezapInterface
      */
     private object $contact;
 
-    /**
-     * Guarda alguns erros que podem ocorrer.
-     *
-     * @var string
-     */
-    private string $errors;
 
     public function __construct(Sender $sender, Receiver $receiver)
     {
-        // verifica .env
-        if (!$this->checkEnv()) {
-            echo $this->getErrors();
-            die;
-        }
-
         // busca constantes do .env
         $this->host = $_ENV['FIVEZAP_HOST'];
         $this->api_version = $_ENV['FIVEZAP_API_VERSION'];
@@ -153,24 +142,6 @@ class Fivezap implements FivezapInterface
 
         // busca ou cria contato em todas as requests.
         $this->searchContact();
-    }
-
-    /**
-     *Verifica se atributos estão preenchidos.
-     *
-     * @return mixed
-     */
-    public function prepare()
-    {
-        try {
-            if (!isset($this->contact)) {
-                throw new \Exception('Oops... erro ao buscar contato, verifique os dados do destinatário..');
-            }
-
-            return $this;
-        } catch (Exception $e) {
-            return $e->getMessage();
-        }
     }
 
     /**
@@ -327,44 +298,6 @@ class Fivezap implements FivezapInterface
     }
 
     /**
-     * Checa .env em busca das contantes do host e versão da Api.
-     *
-     * @return bool
-     */
-    public function checkEnv()
-    {
-        $err = [];
-        // Verifica se existe host definido no arquivo .env.
-        if (!isset($_ENV['FIVEZAP_HOST'])) {
-            $exception = new \Exception('FIVEZAP_HOST não encontado no arquivo .env');
-            $err[] = $exception->getMessage();
-        }
-
-        // Verifica se existe a versão da api definida no arquivo .env.
-        if (!isset($_ENV['FIVEZAP_API_VERSION'])) {
-            $exception = new \Exception('FIVEZAP_API_VERSION não encontado no arquivo .env');
-            $err[] = $exception->getMessage();
-        }
-
-        if ($err) {
-            $this->errors = json_encode($err);
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Retorna erros.
-     *
-     * @return string
-     */
-    public function getErrors()
-    {
-        return $this->errors;
-    }
-
-    /**
      * Converte array para objeto.
      *
      * @param array $array
@@ -373,5 +306,20 @@ class Fivezap implements FivezapInterface
     public function toObject(array $array)
     {
         return json_decode(json_encode($array), false);
+    }
+
+    /**
+     * Recupera erros da requisição.
+     *
+     * @return void
+     */
+    public function getErrors()
+    {
+        return json_encode(
+            [
+                'status' => $this->erros['code'],
+                'message' => $this->erros['message']
+            ]
+        );
     }
 }

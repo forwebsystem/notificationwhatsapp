@@ -2,6 +2,7 @@
 
 namespace ForWebSystem\NotificationWhatsApp\Traits;
 
+
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 
@@ -47,6 +48,13 @@ trait RequestTrait
      * @var integer
      */
     public int $status_code;
+    
+    /**
+     * Array contendo mensagem e codigo de erro.
+     *
+     * @var array
+     */
+    public array $erros = [];
 
     public function makeHttpRequest()
     {
@@ -67,7 +75,11 @@ trait RequestTrait
 
             return json_decode($response, true);
         } catch (RequestException $e) {
+            // para qualquer codigo diferente de 200;
             if ($e->hasResponse()) {
+                $this->erros['code'] = $e->getResponse()->getStatusCode();
+                $this->erros['message'] = $e->getResponse()->getBody()->getContents();
+
                 return $e->getResponse()->getBody()->getContents();
             }
 
