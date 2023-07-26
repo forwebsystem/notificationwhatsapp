@@ -182,15 +182,16 @@ class Fivezap implements FivezapInterface
         // formato E.164, por exemplo: +5511000000000
         $value = $param ?? $this->receiver_phone;
         $len = strlen($value);
+        $country_code = substr($value, 0, 3);
 
         // pega os 3 primeiros caracteres do telefone
-        if (substr($value, 0, 3) != '+55') {
-            throw new FivezapException('O contato não pertence ao Brasil.', 400);
+        if ($country_code != '+55') {
+            throw new FivezapException('O contato não pertence ao Brasil. ', 400);
         }
 
         // se menor que 13 e menor que 14 ou naior que 15 gero exceção.
         if (($len < 13 && $len < 14) || $len > 14) {
-            throw new FivezapException('O contato não pertence ao Brasil.', 400);
+            throw new FivezapException('Número de telefone inválido.', 400);
         }
 
         $this->method = 'GET';
@@ -200,26 +201,30 @@ class Fivezap implements FivezapInterface
         $response = $this->makeHttpRequest();
 
         // para mais de um resultado, filtra e compara um que seja igual ao recebido.
-        if (isset($response['meta']) && $response['meta']['count'] > 1) {
+        if (isset($response['meta']) && $response['meta']['count']) {
             $meta = $response['meta'];
             $payload = $response['payload'];
 
-            $payload = array_filter($payload, fn ($el) => ($el['phone_number'] == $value));
+            // filtra contato se houver mais de um resultado.
+            if ($response['meta']['count'] > 1) {
+                $payload = array_filter($payload, fn ($el) => ($el['phone_number'] == $value));
+            }
+
+            if (!$payload) {
+                throw new FivezapException('Contato não encontrado na pesquisa.', 404);
+            }
+
+            // reseta ponteiro do array
             $payload = reset($payload);
-
-            $this->source_id = $payload['contact_inboxes'][0]['source_id'];
             $this->contact = $this->toObject($payload);
 
-            return $this->contact;
-        }
+            // se o contato não está vinculado a uma inbox, cria vinculo.
+            if (!$payload['contact_inboxes']) {
+                $contact_inbox = $this->createContactInboxes();
+            }
 
-        // contato encontrado, atribui a propriedades e busca conversação.
-        if (isset($response['meta']) && $response['meta']['count'] == 1) {
-            $meta = $response['meta'];
-            $payload = reset($response['payload']);
-
-            $this->source_id = $payload['contact_inboxes'][0]['source_id'];
-            $this->contact = $this->toObject($payload);
+            // atribui source_id
+            $this->source_id = $contact_inbox['source_id'] ?? $payload['contact_inboxes'][0]['source_id'];
 
             return $this->contact;
         }
@@ -321,6 +326,28 @@ class Fivezap implements FivezapInterface
         }
 
         // se encontrou retorna.
+        return $response;
+    }
+
+    /**
+     * Cria vinculo do contato com uma inbox.
+     *
+     * @return void
+     */
+    public function createContactInboxes()
+    {
+        $this->method = 'POST';
+        $this->end_point = "/accounts/{$this->account_id}/contacts/{$this->contact->id}/contact_inboxes";
+        $this->url = $this->host . $this->api_version . $this->end_point;
+
+        $this->body =
+        [
+            'inbox_id' => $this->inbox,
+            'source_id' => $this->contact->phone_number
+        ];
+
+        $response = $this->makeHttpRequest();
+
         return $response;
     }
 
