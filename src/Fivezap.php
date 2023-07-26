@@ -199,12 +199,27 @@ class Fivezap implements FivezapInterface
 
         $response = $this->makeHttpRequest();
 
+        // para mais de um resultado, filtra e compara um que seja igual ao recebido.
+        if (isset($response['meta']) && $response['meta']['count'] > 1) {
+            $meta = $response['meta'];
+            $payload = $response['payload'];
+
+            $payload = array_filter($payload, fn ($el) => ($el['phone_number'] == $value));
+            $payload = reset($payload);
+
+            $this->source_id = $payload['contact_inboxes'][0]['source_id'];
+            $this->contact = $this->toObject($payload);
+
+            return $this->contact;
+        }
+
         // contato encontrado, atribui a propriedades e busca conversação.
         if (isset($response['meta']) && $response['meta']['count'] == 1) {
             $meta = $response['meta'];
-            $payload = $response['payload'];
-            $this->source_id = $payload[0]['contact_inboxes'][0]['source_id'];
-            $this->contact = $this->toObject($payload[0]);
+            $payload = reset($response['payload']);
+
+            $this->source_id = $payload['contact_inboxes'][0]['source_id'];
+            $this->contact = $this->toObject($payload);
 
             return $this->contact;
         }
