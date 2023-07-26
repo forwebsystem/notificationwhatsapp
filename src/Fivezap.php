@@ -116,7 +116,6 @@ class Fivezap implements FivezapInterface
      */
     private object $contact;
 
-
     public function __construct(Sender $sender, Receiver $receiver)
     {
         // busca constantes do .env
@@ -179,7 +178,20 @@ class Fivezap implements FivezapInterface
      */
     public function searchContact(string $param = null)
     {
+        // O formato esperado é +55xx912345678 ou +55xx12345678.
+        // formato E.164, por exemplo: +5511000000000
         $value = $param ?? $this->receiver_phone;
+        $len = strlen($value);
+
+        // pega os 3 primeiros caracteres do telefone
+        if (substr($value, 0, 3) != '+55') {
+            throw new FivezapException('O contato não pertence ao Brasil.', 400);
+        }
+
+        // se menor que 13 e menor que 14 ou naior que 15 gero exceção.
+        if (($len < 13 && $len < 14) || $len > 14) {
+            throw new FivezapException('O contato não pertence ao Brasil.', 400);
+        }
 
         $this->method = 'GET';
         $this->end_point = "/accounts/$this->account_id/contacts/search?q={$value}";
