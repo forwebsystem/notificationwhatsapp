@@ -352,6 +352,39 @@ class Fivezap implements FivezapInterface
     }
 
     /**
+     * Cadastro de webhooks.
+     * 
+     * conversation_created
+     * conversation_status_changed
+     * conversation_updated
+     * message_created
+     * message_updated
+     * webwidget_triggered
+     *
+     * @param string $url
+     * @param array $subscriptions
+     * @return void
+     */
+    public function webhookCreate(string $url, array $subscriptions = ['message_created'])
+    {
+        $this->method = 'POST';
+        $this->end_point = "/accounts/{$this->account_id}/webhooks";
+        $this->url = $this->host . $this->api_version . $this->end_point;
+
+        $this->body =
+        [
+            'webhook' => [
+                "url" => $url,
+                "subscriptions" => $subscriptions
+            ]
+        ];
+
+        $response = $this->makeHttpRequest();
+
+        return $response;
+    }
+
+    /**
      * Converte array para objeto.
      *
      * @param array $array

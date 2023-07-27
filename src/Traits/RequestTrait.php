@@ -2,7 +2,6 @@
 
 namespace ForWebSystem\NotificationWhatsApp\Traits;
 
-
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 
@@ -48,7 +47,7 @@ trait RequestTrait
      * @var integer
      */
     public int $status_code;
-    
+
     /**
      * Array contendo mensagem e codigo de erro.
      *
