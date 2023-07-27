@@ -4,6 +4,8 @@ namespace ForWebSystem\NotificationWhatsApp\Traits;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
+use ForWebSystem\NotificationWhatsApp\Exceptions\FivezapException;
+use ForWebSystem\NotificationWhatsApp\Model\NotificationWhatsAppMensagem;
 
 trait RequestTrait
 {
@@ -55,6 +57,8 @@ trait RequestTrait
      */
     public array $erros = [];
 
+    public string $user_type;
+
     public function makeHttpRequest()
     {
         $client = new Client();
@@ -71,18 +75,62 @@ trait RequestTrait
 
             $this->status_code = $response->getStatusCode();
             $response = $response->getBody()->getContents();
+            $this->saveLog($response);
+            $result = json_decode($response, true);
 
-            return json_decode($response, true);
+            return $result;
         } catch (RequestException $e) {
             // para qualquer codigo diferente de 200;
             if ($e->hasResponse()) {
                 $this->erros['code'] = $e->getResponse()->getStatusCode();
                 $this->erros['message'] = $e->getResponse()->getBody()->getContents();
+                $this->saveLog(json_encode($this->erros));
 
                 return $e->getResponse()->getBody()->getContents();
             }
 
+            $this->saveLog($e->getMessage());
             return $e->getMessage();
+        }
+    }
+
+    /**
+     * Log de requisições.
+     *
+     * @param mixed $data
+     * @return void
+     */
+    public function saveLog($data)
+    {
+        try {
+            NotificationWhatsAppMensagem::create(
+                [
+                    'user_type' => $this->user_type,
+                    'user_id' => '0',
+                    'service' => 'fivezap',
+                    'method' => $this->method,
+                    'url' => $this->url,
+                    'type' => 'outgoing',
+                    'context' => json_encode($this->body),
+                    'result' => $data
+                ]
+            );
+        } catch (FivezapException $e) {
+            Log::debug(
+                json_encode(
+                    [
+                        'error_save' => json_encode(['message' => $e->getMessage()]),
+                        'user_type' => $this->user_type,
+                        'user_id' => '0',
+                        'service' => 'fivezap',
+                        'method' => $this->method,
+                        'url' => $this->url,
+                        'type' => 'outgoing',
+                        'context' => json_encode($this->body),
+                        'result' => $data
+                    ]
+                )
+            );
         }
     }
 }
