@@ -44,6 +44,12 @@ trait RequestTrait
     protected $body = null;
 
     /**
+     * Resposta da requisição atual;
+     *
+     */
+    private $response;
+
+    /**
      * Guarda status code da requisição.
      *
      * @var integer
@@ -57,13 +63,24 @@ trait RequestTrait
      */
     public array $erros = [];
 
-    public string $user_type;
+    /**
+     * Sender para preenchimento de logs.
+     *
+     */
+    protected abstract function sender();
+
+    /**
+     * Receiver para preenchimento de logs.
+     *
+     */
+    protected abstract function receiver();
 
     public function makeHttpRequest()
     {
         $client = new Client();
 
         try {
+            // Envia requisição.
             $response = $client->request(
                 $this->method,
                 $this->url,
@@ -73,15 +90,27 @@ trait RequestTrait
                 ]
             );
 
+            // Guarda status code
             $this->status_code = $response->getStatusCode();
+
+            // Conteúdo da requisição.
             $response = $response->getBody()->getContents();
-            $this->saveLog($response);
+
+            // Converte para ojeto.
             $result = json_decode($response, true);
+
+            // Guarda resposta.
+            $this->response = $result;
+
+            // Salva logs da request.
+            $this->saveLog($response);
 
             return $result;
         } catch (RequestException $e) {
             // para qualquer codigo diferente de 200;
             if ($e->hasResponse()) {
+
+                // Guarda erros.
                 $this->erros['code'] = $e->getResponse()->getStatusCode();
                 $this->erros['message'] = $e->getResponse()->getBody()->getContents();
                 $this->saveLog(json_encode($this->erros));
@@ -105,14 +134,19 @@ trait RequestTrait
         try {
             NotificationWhatsAppMensagem::create(
                 [
-                    'user_type' => $this->user_type,
+                    'user_type' => get_class($this->sender),
                     'user_id' => '0',
                     'service' => 'fivezap',
                     'method' => $this->method,
                     'url' => $this->url,
+                    'type_mensagem'     => $this->response['content_type'] ?? '',
+                    'phone_destination' => '--',
+                    'phone_participant' => $this->receiver()->telefone,
+                    'sender_name'       => $this->sender->name ?? '',
                     'type' => 'outgoing',
-                    'context' => json_encode($this->body),
-                    'result' => $data
+                    'context' => json_encode($this->body) ?? null,
+                    'result' => $data,
+                    'status' => $this->response['status'] ?? '',
                 ]
             );
         } catch (FivezapException $e) {
@@ -120,14 +154,19 @@ trait RequestTrait
                 json_encode(
                     [
                         'error_save' => json_encode(['message' => $e->getMessage()]),
-                        'user_type' => $this->user_type,
+                        'user_type' => get_class($this->sender),
                         'user_id' => '0',
                         'service' => 'fivezap',
                         'method' => $this->method,
                         'url' => $this->url,
+                        'type_mensagem'     => $this->response['content_type'] ?? '',
+                        'phone_destination' => '--',
+                        'phone_participant' => $this->receiver()->telefone,
+                        'sender_name'       => $this->sender->name ?? '',
                         'type' => 'outgoing',
                         'context' => json_encode($this->body),
-                        'result' => $data
+                        'result' => $data,
+                        'status' => $this->response['status'] ?? '',
                     ]
                 )
             );

@@ -118,18 +118,18 @@ class Fivezap implements FivezapInterface
 
     public function __construct(Sender $sender, Receiver $receiver)
     {
-        $this->user_type = get_class($sender);
-        
         // busca constantes do .env
         $this->host = $_ENV['FIVEZAP_HOST'];
         $this->api_version = $_ENV['FIVEZAP_API_VERSION'];
 
         // Preenche propriedades do remetente.
+        $this->sender = $sender;
         $this->token = $sender->getToken();
         $this->account_id = $sender->getAccount();
         $this->inbox = $sender->getInbox();
 
         // Preenche propriedades do destinatário.
+        $this->receiver = $receiver;
         $this->receiver_name = $receiver->getName();
         $this->receiver_email = $receiver->getEmail();
         $this->receiver_phone = $receiver->getPhone();
@@ -384,6 +384,26 @@ class Fivezap implements FivezapInterface
         $response = $this->makeHttpRequest();
 
         return $response;
+    }
+
+    /**
+     * Sender.
+     *
+     * @return object
+     */
+    protected function sender()
+    {
+        return $this->sender;
+    }
+
+    /**
+     * Receiver.
+     *
+     * @return object
+     */
+    protected function receiver()
+    {
+        return $this->receiver;
     }
 
     /**
