@@ -413,7 +413,7 @@ class Fivezap implements FivezapInterface
      * @param array $params
      * @return void
      */
-    public static function execMethod(string $method = '',array $params)
+    public static function execMethod(Sender $sender, Receiver $receiver, string $method = '', array $params)
     {
         // Verifica se metodo passado existe.
         if (!method_exists(Self::class, $method)) {
@@ -421,10 +421,7 @@ class Fivezap implements FivezapInterface
         }
         
         // Objeto de da classe atual.
-        $fivezap = (new self($params['sender'], $params['receiver']));
-        
-        // Remove indices
-        unset($params['sender'], $params['receiver']);
+        $fivezap = (new self($sender, $receiver));
 
         // Executa metodo passando parâmetros.
         return call_user_func_array([$fivezap, $method], $params);
