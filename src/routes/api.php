@@ -27,5 +27,5 @@ Route::middleware('api', 'requestLog:whatsapp-api', 'requestValidation:whatsapp-
         Route::post('webhook/{token}/message-status',   ['as' => 'webhook.message-status',  'uses' => 'WebhookController@messageStatus']);
 
         // Fivezap
-        Route::post('webhook/fivezap', 'WebhookController@fivezapMessage');
+        Route::post('webhook/fivezap', 'WebhookController@fivezapMessage')->name('webhook.fivezap');
 });
