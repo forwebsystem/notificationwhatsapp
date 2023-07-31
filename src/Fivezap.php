@@ -407,6 +407,30 @@ class Fivezap implements FivezapInterface
     }
 
     /**
+     * Chama métodos da classe dinamicamente caso haja necessidade.
+     *
+     * @param string $method
+     * @param array $params
+     * @return void
+     */
+    public static function execMethod(string $method = '',array $params)
+    {
+        // Verifica se metodo passado existe.
+        if (!method_exists(Self::class, $method)) {
+            Throw new FivezapException("Método $method() não encontrado no contexto atual.");
+        }
+        
+        // Objeto de da classe atual.
+        $fivezap = (new self($params['sender'], $params['receiver']));
+        
+        // Remove indices
+        unset($params['sender'], $params['receiver']);
+
+        // Executa metodo passando parâmetros.
+        return call_user_func_array([$fivezap, $method], $params);
+    }
+
+    /**
      * Converte array para objeto.
      *
      * @param array $array
