@@ -284,7 +284,7 @@ class Fivezap implements FivezapInterface
 
         // filtra array de conversação e pega a conversação da inbox.
         $result = array_filter($conversations, fn ($el) => (
-            ($el['inbox_id'] == $this->inbox) && ($el['status'] == 'open')
+            ($el['inbox_id'] == $this->inbox) && ($el['status'] == 'open' || $el['status'] == 'pending')
         ));
 
         // remove primeiro ponteiro do array.
