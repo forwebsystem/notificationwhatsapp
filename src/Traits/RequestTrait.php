@@ -135,7 +135,7 @@ trait RequestTrait
             NotificationWhatsAppMensagem::create(
                 [
                     'user_type' => get_class($this->sender),
-                    'user_id' => '0',
+                    'user_id' => $this->sender->id ?? 0,
                     'service' => 'fivezap',
                     'method' => $this->method,
                     'url' => $this->url,
@@ -155,7 +155,7 @@ trait RequestTrait
                     [
                         'error_save' => json_encode(['message' => $e->getMessage()]),
                         'user_type' => get_class($this->sender),
-                        'user_id' => '0',
+                        'user_id' => $this->sender->id ?? 0,
                         'service' => 'fivezap',
                         'method' => $this->method,
                         'url' => $this->url,
