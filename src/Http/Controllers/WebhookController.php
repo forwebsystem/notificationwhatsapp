@@ -76,14 +76,15 @@ class WebhookController extends Controller
         $inbox_id       = $request->conversation['inbox_id'];
         
         if ($message_type == 'incoming') {
-            
-            // notificationwhatsapp_license = account no fivezap.
-            // notificationwhatsapp_token   = inbox no fivezap.
+            // busca a instancia
             $user = User::where('notificationwhatsapp_license', $account_id)
             ->where('notificationwhatsapp_token', $inbox_id)
             ->first();
 
+            // salva requisicao
             $notification = $fivezap->save($method, $url, $message_type, $request->all());
+
+            // preenche objeto de mensagem e dispara evento.
             $fivezap_message = new NotificationWhatsAppReceived($notification->toArray());
             event(new NotificationWhatsAppReceivedEvent($fivezap_message, $user));
         }

@@ -8,6 +8,7 @@ class NotificationWhatsAppReceived extends Model
 {
 
     protected $fillable = [
+        'service',
         'phone',
         'phone_participant',
         'sender_name',
@@ -49,7 +50,7 @@ class NotificationWhatsAppReceived extends Model
         switch($type){
 
             case 'text':
-                return $context->message;
+                return $context->message ?? $context->content;
             case 'image':
                 $descricao = isset($context->caption) ? $context->caption : '';
                 return "<img src='{$context->imageUrl}' height='{$height}' width='auto' /><br />". $descricao ?? '';
@@ -64,10 +65,16 @@ class NotificationWhatsAppReceived extends Model
         $types = ['text', 'image', 'audio', 'video', 'contact', 'document', 'location', 'sticker'];
         $data = json_decode($this->result);
         foreach ($types as $type) {
+            // verifica existencia de indices e tipo
+            if ((!isset($data->event) && isset($data->conversation_id)) && $data->content_type == $type) {
+                return $type;
+            }
+            
             if (!empty($data->{$type})) {
                 return $type;
             }
         }
+
         return '';
     }
 
