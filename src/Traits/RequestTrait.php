@@ -44,6 +44,13 @@ trait RequestTrait
     protected $body = null;
 
     /**
+     * Multipart form data para requisições com envio de arquivos.
+     *
+     * @var array
+     */
+    protected array $form_data = [];
+
+    /**
      * Resposta da requisição atual;
      *
      */
@@ -86,13 +93,14 @@ trait RequestTrait
                 $this->url,
                 [
                     'headers' => $this->headers,
-                    'body' => json_encode($this->body),
+                    'multipart' => $this->form_data,
+                    'body' => json_encode($this->body)
                 ]
             );
-
+            
             // Guarda status code
             $this->status_code = $response->getStatusCode();
-
+            
             // Conteúdo da requisição.
             $response = $response->getBody()->getContents();
 
@@ -141,7 +149,7 @@ trait RequestTrait
                     'url' => $this->url,
                     'type_mensagem'     => $this->response['content_type'] ?? '',
                     'phone_destination' => '--',
-                    'phone_participant' => $this->receiver()->telefone,
+                    'phone_participant' => $this->receiver()->telefone ?? '',
                     'sender_name'       => $this->sender->name ?? '',
                     'type' => 'outgoing',
                     'context' => json_encode($this->body) ?? null,

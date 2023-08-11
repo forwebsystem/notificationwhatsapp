@@ -172,6 +172,86 @@ class Fivezap implements FivezapInterface
         return $response;
     }
 
+    public function audio(string $path = '', string $message = '')
+    {
+        $path = 'https://fivegestor.nyc3.digitaloceanspaces.com/teste.ogg';
+
+        $mime_types = 
+        [
+            'mp3' => 'audio/mpeg',
+            'ogg' => 'audio/ogg',
+            'aac' => 'audio/aac'
+        ];
+
+        // dados brutos do arquivo.
+        $attachment = file_get_contents($path);
+        
+        // instancia de finfo.
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        
+        // mime type, nome e extensão do arquivo.
+        $mime = $finfo->buffer($attachment);
+        $filename = strtolower(basename($path));
+        $ext = pathinfo($filename, PATHINFO_EXTENSION);
+
+        // verifico tipos permitidos.
+        if (in_array($mime, $mime_types) && array_key_exists($ext, $mime_types)) {
+            return $this->sendAttachment($attachment, 'audio', $message);
+        }
+        dd('e tome exception');
+    }
+
+    public function image(string $path)
+    {
+        $mime_types = 
+        [
+            'png' => 'image/png',
+            'jpeg' => 'image/jpeg',
+            'jpg' => 'image/jpeg',
+            'bmp' => 'image/bmp'
+        ];
+        
+        # code...
+    }
+
+    public function document(string $path)
+    {
+        $mime_types =
+        [
+            'pdf' => 'application/pdf',
+            'doc' => 'application/msword',
+            'xls' => 'application/vnd.ms-excel',
+            'ppt' => 'application/vnd.ms-powerpoint',
+        ];
+
+        # code...
+    }
+
+    public function sendAttachment($attachment, $type, $message)
+    {
+        $this->method = 'POST';
+        $this->end_point = "/accounts/$this->account_id/conversations/{$this->conversation->id}/messages";
+        $this->url = $this->host . $this->api_version . $this->end_point;
+
+        $this->headers =
+        [
+            'Content-Type' => 'multipart/form-data; boundary=----WebKitFormBoundary',
+            'api_access_token' => $this->token
+        ];
+
+        $this->body = null;
+        $this->form_data =
+        [
+            'attachments[]' => $attachment,
+            'content' => $message,
+            'message_type' => 'incoming',
+            'file_type' => $type
+        ];
+
+        $response = $this->makeHttpRequest();
+        return $response;
+    }
+
     /**
      * Busca um contato pelo name, identifier, email ou phone number
      *
@@ -219,6 +299,7 @@ class Fivezap implements FivezapInterface
             // reseta ponteiro do array
             $payload = reset($payload);
             $this->contact = $this->toObject($payload);
+            dd($this->contact);
 
             // se o contato não está vinculado a uma inbox, cria vinculo.
             if (!$payload['contact_inboxes']) {
@@ -420,7 +501,7 @@ class Fivezap implements FivezapInterface
             Throw new FivezapException("Método $method() não encontrado no contexto atual.");
         }
         
-        // Objeto de da classe atual.
+        // Objeto da classe atual.
         $fivezap = (new self($sender, $receiver));
 
         // Executa metodo passando parâmetros.
