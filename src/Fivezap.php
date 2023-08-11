@@ -326,11 +326,13 @@ class Fivezap implements FivezapInterface
         $this->end_point = "/accounts/$this->account_id/contacts";
         $this->url = $this->host . $this->api_version . $this->end_point;
 
+        $identifier = ltrim($this->receiver_phone, '+') . '@s.whatsapp.net';
         $this->body =
         [
             'name' => $this->receiver_name,
             'inbox_id' => $this->inbox,
             'phone_number' => $this->receiver_phone,
+            'identifier' => $identifier,
             'email' => $this->receiver_email
         ];
 
