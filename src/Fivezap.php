@@ -196,6 +196,8 @@ class Fivezap implements FivezapInterface
 
         // verifico tipos permitidos.
         if (in_array($mime, $mime_types) && array_key_exists($ext, $mime_types)) {
+            $this->searchContact();
+            $this->getContactConversation();
             return $this->sendAttachment($attachment, 'audio', $message);
         }
         dd('e tome exception');
@@ -281,7 +283,6 @@ class Fivezap implements FivezapInterface
         $this->url = $this->host . $this->api_version . $this->end_point;
 
         $response = $this->makeHttpRequest();
-
         // para mais de um resultado, filtra e compara um que seja igual ao recebido.
         if (isset($response['meta']) && $response['meta']['count']) {
             $meta = $response['meta'];
@@ -299,7 +300,6 @@ class Fivezap implements FivezapInterface
             // reseta ponteiro do array
             $payload = reset($payload);
             $this->contact = $this->toObject($payload);
-            dd($this->contact);
 
             // se o contato não está vinculado a uma inbox, cria vinculo.
             if (!$payload['contact_inboxes']) {

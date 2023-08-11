@@ -94,7 +94,7 @@ trait RequestTrait
                 [
                     'headers' => $this->headers,
                     'multipart' => $this->form_data,
-                    'body' => json_encode($this->body)
+                    // 'body' => json_encode($this->body)
                 ]
             );
             
