@@ -44,11 +44,10 @@ trait RequestTrait
     protected $body = null;
 
     /**
-     * Multipart form data para requisições com envio de arquivos.
+     * Request options
      *
-     * @var array
      */
-    protected array $form_data = [];
+    protected $options = null;
 
     /**
      * Resposta da requisição atual;
@@ -85,22 +84,23 @@ trait RequestTrait
     public function makeHttpRequest()
     {
         $client = new Client();
+        $options = 
+        [
+            'headers' => $this->headers,
+            'body' => json_encode($this->body),
+        ];
 
         try {
             // Envia requisição.
             $response = $client->request(
                 $this->method,
                 $this->url,
-                [
-                    'headers' => $this->headers,
-                    'multipart' => $this->form_data,
-                    // 'body' => json_encode($this->body)
-                ]
+                $this->options ?? $options
             );
-            
+
             // Guarda status code
             $this->status_code = $response->getStatusCode();
-            
+
             // Conteúdo da requisição.
             $response = $response->getBody()->getContents();
 
