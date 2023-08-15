@@ -8,7 +8,6 @@ use ForWebSystem\NotificationWhatsApp\Contracts\SenderInterface as Sender;
 use ForWebSystem\NotificationWhatsApp\Contracts\ReceiverInterface as Receiver;
 use ForWebSystem\NotificationWhatsApp\Exceptions\FivezapException;
 use GuzzleHttp\Psr7\MultipartStream;
-use PhpParser\Node\Expr\Throw_;
 use ForWebSystem\NotificationWhatsApp\Helpers\Helpers;
 
 class Fivezap implements FivezapInterface
@@ -226,8 +225,14 @@ class Fivezap implements FivezapInterface
         if (in_array($mime, $mime_types) && array_key_exists($ext, $mime_types)) {
             return $this->sendAttachment($attachment, $ext, 'audio', $message);
         }
-        
-        throw new FivezapException('Formato de audio inválido.');
+
+        // string de formatas aceitos
+        $types = '';
+        foreach ($mime_types as $key => $value) {
+            $types .= " .$key";
+        }
+
+        throw new FivezapException("Formato de audio não permitido, formatos aceitos... \"$types\".");
     }
 
     /**
@@ -278,7 +283,7 @@ class Fivezap implements FivezapInterface
      * @param string $message
      * @return void
      */
-    public function sendAttachment(string $attachment, string $extension,string $type,string $message)
+    public function sendAttachment(string $attachment, string $extension, string $type, string $message)
     {
         // Metodo da request, endpoint e url.
         $this->method = 'POST';
