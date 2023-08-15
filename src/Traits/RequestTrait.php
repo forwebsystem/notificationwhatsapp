@@ -141,7 +141,7 @@ trait RequestTrait
                     'url' => $this->url,
                     'type_mensagem'     => $this->response['content_type'] ?? '',
                     'phone_destination' => '--',
-                    'phone_participant' => $this->receiver()->telefone,
+                    'phone_participant' => $this->receiver()->telefone ?? '',
                     'sender_name'       => $this->sender->name ?? '',
                     'type' => 'outgoing',
                     'context' => json_encode($this->body) ?? null,
