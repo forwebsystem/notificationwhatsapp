@@ -9,6 +9,7 @@ use ForWebSystem\NotificationWhatsApp\Contracts\ReceiverInterface as Receiver;
 use ForWebSystem\NotificationWhatsApp\Exceptions\FivezapException;
 use GuzzleHttp\Psr7\MultipartStream;
 use PhpParser\Node\Expr\Throw_;
+use ForWebSystem\NotificationWhatsApp\Helpers\Helpers;
 
 class Fivezap implements FivezapInterface
 {
@@ -142,9 +143,33 @@ class Fivezap implements FivezapInterface
             'Content-Type' => 'application/json',
             'api_access_token' => $this->token
         ];
+    }
 
-        // busca ou cria contato em todas as requests.
+    /**
+     * Esse metodo deve encadeado antes de qualquer outro para verificar disponibilidade de
+     * contato e conversação.
+     *
+     * @return object
+     */
+    public function prepare()
+    {
+        // busca ou cria contato.
         $this->searchContact();
+
+        // Exception se nenhum contato for encontrado.
+        if (!isset($this->contact)) {
+            throw new FivezapException("Verifique o telefone fornecido ou os dados de conexão... $this->receiver_phone");
+        }
+
+        // busca ou cria uma conversação.
+        $this->getContactConversation();
+
+        // Exception se não conseguir abrir uma conversação com o contato.
+        if (!isset($this->conversation)) {
+            throw new FivezapException("Erro ao abrir uma conversação para o contato atual. $this->receiver_phone");
+        }
+
+        return $this;
     }
 
     /**
@@ -307,7 +332,7 @@ class Fivezap implements FivezapInterface
      * @param string $param
      * @return object
      */
-    public function searchContact(string $param = null)
+    public function searchContact(string $param = null, bool $recursive = true)
     {
         // O formato esperado é +55xx912345678 ou +55xx12345678.
         // formato E.164, por exemplo: +5511000000000
@@ -335,13 +360,15 @@ class Fivezap implements FivezapInterface
             $meta = $response['meta'];
             $payload = $response['payload'];
 
-            // filtra contato se houver mais de um resultado.
+            // Garante que o contato a ser notificado é realmente o que precisamos quando temos mais de um resultado.
             if ($response['meta']['count'] > 1) {
-                $payload = array_filter($payload, fn ($el) => ($el['phone_number'] == $value));
+                $payload = array_filter($payload, fn ($el) => (
+                    ($el['phone_number'] == $value) && (explode('@', $el['identifier'])[0] == ltrim($value, '+'))
+                ));
             }
 
             if (!$payload) {
-                throw new FivezapException('Contato não encontrado na pesquisa.', 404);
+                throw new FivezapException("Contato não encontrado na pesquisa. $value", 404);
             }
 
             // reseta ponteiro do array
@@ -356,6 +383,15 @@ class Fivezap implements FivezapInterface
             // atribui source_id
             $this->source_id = $contact_inbox['source_id'] ?? $payload['contact_inboxes'][0]['source_id'];
             return $this->contact;
+        }
+
+        // Busca novamente colocando ou retirando o nono digito.
+        if ($recursive) {
+            // Metodo que faz a mágica.
+            $value = Helpers::changePhoneDigit($value);
+
+            // Faz a busca novamente.
+            return $this->searchContact($value, false);
         }
 
         return $this->createContact();
