@@ -225,8 +225,11 @@ class Fivezap implements FivezapInterface
      * @param string $path
      * @return void
      */
-    public function image(string $path)
+    public function image(string $path, string $message = '')
     {
+        // tipo de media.
+        $media_type = 'image';
+
         // Tipos mime para imagens.
         $mime_types =
         [
@@ -236,7 +239,10 @@ class Fivezap implements FivezapInterface
             'bmp' => 'image/bmp'
         ];
 
-        // code...
+        // Faz tratamento e validação do arquivo.
+        $file = Helpers::processFile($path, $mime_types);
+
+        return $this->sendAttachment($file->content, $file->extension, $media_type, $message);
     }
 
     /**
@@ -245,7 +251,7 @@ class Fivezap implements FivezapInterface
      * @param string $path
      * @return void
      */
-    public function document(string $path)
+    public function file(string $path, string $message = '')
     {
         // Tipos mime para documentos.
         $mime_types =
