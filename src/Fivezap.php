@@ -203,14 +203,13 @@ class Fivezap implements FivezapInterface
     public function audio(string $path, string $message = '')
     {
         // tipo de media.
-        $media_type = 'audio';
+        $media_type = 'file';
 
         // Tipos mime para audio.
         $mime_types =
         [
             'mp3' => 'audio/mpeg',
             'ogg' => 'audio/ogg',
-            'aac' => 'audio/aac'
         ];
 
         // Faz tratamento e validação do arquivo.
@@ -253,6 +252,9 @@ class Fivezap implements FivezapInterface
      */
     public function file(string $path, string $message = '')
     {
+        // tipo de media.
+        $media_type = 'file';
+
         // Tipos mime para documentos.
         $mime_types =
         [
@@ -260,7 +262,13 @@ class Fivezap implements FivezapInterface
             'doc' => 'application/msword',
             'xls' => 'application/vnd.ms-excel',
             'ppt' => 'application/vnd.ms-powerpoint',
+            'aac' => 'audio/aac'
         ];
+
+        // Faz tratamento e validação do arquivo.
+        $file = Helpers::processFile($path, $mime_types);
+
+        return $this->sendAttachment($file->content, $file->extension, $media_type, $message);
 
         // code...
     }
