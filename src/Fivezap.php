@@ -202,6 +202,9 @@ class Fivezap implements FivezapInterface
      */
     public function audio(string $path, string $message = '')
     {
+        // tipo de media.
+        $media_type = 'audio';
+
         // Tipos mime para audio.
         $mime_types =
         [
@@ -210,29 +213,10 @@ class Fivezap implements FivezapInterface
             'aac' => 'audio/aac'
         ];
 
-        // dados brutos do arquivo.
-        $attachment = file_get_contents($path);
+        // Faz tratamento e validação do arquivo.
+        $file = Helpers::processFile($path, $mime_types);
 
-        // instancia de finfo.
-        $finfo = new \finfo(FILEINFO_MIME_TYPE);
-
-        // mime type, nome e extensão do arquivo.
-        $mime = $finfo->buffer($attachment);
-        $filename = strtolower(basename($path));
-        $ext = pathinfo($filename, PATHINFO_EXTENSION);
-
-        // verifico tipos permitidos.
-        if (in_array($mime, $mime_types) && array_key_exists($ext, $mime_types)) {
-            return $this->sendAttachment($attachment, $ext, 'audio', $message);
-        }
-
-        // string de formatas aceitos
-        $types = '';
-        foreach ($mime_types as $key => $value) {
-            $types .= " .$key";
-        }
-
-        throw new FivezapException("Formato de audio não permitido, formatos aceitos... \"$types\".");
+        return $this->sendAttachment($file->content, $file->extension, $media_type, $message);
     }
 
     /**
@@ -304,7 +288,7 @@ class Fivezap implements FivezapInterface
             [
                 'name' => 'attachments[]',
                 'contents' => $attachment,
-                'filename' => uniqid() . ".$extension"
+                'filename' => uniqid() . "$extension"
             ],
             [
                 'name' => 'content',
