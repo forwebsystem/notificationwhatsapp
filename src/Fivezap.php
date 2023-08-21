@@ -366,7 +366,7 @@ class Fivezap implements FivezapInterface
             // Garante que o contato a ser notificado é realmente o que precisamos quando temos mais de um resultado.
             if ($response['meta']['count'] > 1) {
                 $payload = array_filter($payload, fn ($el) => (
-                    ($el['phone_number'] == $value) && (explode('@', $el['identifier'])[0] == ltrim($value, '+'))
+                    ($el['phone_number'] == $value) || (explode('@', $el['identifier'])[0] == ltrim($value, '+'))
                 ));
             }
 
@@ -378,13 +378,28 @@ class Fivezap implements FivezapInterface
             $payload = reset($payload);
             $this->contact = $this->toObject($payload);
 
-            // se o contato não está vinculado a uma inbox, cria vinculo.
+            // contatos criados pelo painel não geram o vinculo da inbox então geramos o vinculo aqui.
             if (!$payload['contact_inboxes']) {
                 $contact_inbox = $this->createContactInboxes();
+                $this->source_id = $contact_inbox['source_id'];
+
+                return $this->contact;
+            }
+            
+            // filtra array com as inboxes vinculadas ao contato e pega a que preciso.
+            $filtered_inbox = array_filter($payload['contact_inboxes'], fn($el) => $el['inbox']['id'] == $this->inbox);
+            
+            // array com o vinculo de contato com a inbox.
+            $filtered_inbox = reset($filtered_inbox);
+
+            // se não temos nenhum resultado no filtro, criamos um novo vinculo.
+            if (!$filtered_inbox) {
+                $filtered_inbox = $this->createContactInboxes();
             }
 
             // atribui source_id
-            $this->source_id = $contact_inbox['source_id'] ?? $payload['contact_inboxes'][0]['source_id'];
+            $this->source_id = $filtered_inbox['source_id'];
+
             return $this->contact;
         }
 
@@ -513,7 +528,7 @@ class Fivezap implements FivezapInterface
         $this->body =
         [
             'inbox_id' => $this->inbox,
-            'source_id' => $this->contact->phone_number
+            'source_id' => (string) \Str::uuid()
         ];
 
         $response = $this->makeHttpRequest();
