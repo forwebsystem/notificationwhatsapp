@@ -121,8 +121,8 @@ class Fivezap implements FivezapInterface
     public function __construct(Sender $sender, Receiver $receiver)
     {
         // busca constantes do .env
-        $this->host = $_ENV['FIVEZAP_HOST'];
-        $this->api_version = $_ENV['FIVEZAP_API_VERSION'];
+        $this->host = env('FIVEZAP_HOST');
+        $this->api_version = env('FIVEZAP_API_VERSION');
 
         // Preenche propriedades do remetente.
         $this->sender = $sender;
