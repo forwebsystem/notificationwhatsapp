@@ -40,23 +40,25 @@ class NotificationWhatsAppReceived extends Model
 
     public function getContext()
     {
+        // parse do conteudo da coluna context.
         return json_decode($this->context);
     }
 
     public function html($height="250px")
     {
+        // conluna context do banco
         $context = $this->getContext();
+
+        // tipo da mensagem
         $type = $this->getTypeContext();
         switch($type){
-
             case 'text':
-                return $context->message ?? $context->content;
+                return $context->message ?? $context;
             case 'image':
-                $descricao = isset($context->caption) ? $context->caption : '';
+                $descricao = $context->caption ?? '';
                 return "<img src='{$context->imageUrl}' height='{$height}' width='auto' /><br />". $descricao ?? '';
             default:
                 return "Mensagem do tipo {$type} ainda não suportada";
-
         }
     }
 
@@ -65,11 +67,12 @@ class NotificationWhatsAppReceived extends Model
         $types = ['text', 'image', 'audio', 'video', 'contact', 'document', 'location', 'sticker'];
         $data = json_decode($this->result);
         foreach ($types as $type) {
-            // verifica existencia de indices e tipo
-            if ((!isset($data->event) && isset($data->conversation_id)) && $data->content_type == $type) {
+            // verifica existencia de indices e tipo para mensagens do fivezap 2.0
+            if (isset($data->content_type) && $data->content_type == $type) {
                 return $type;
             }
             
+            // fivezap 1.0.
             if (!empty($data->{$type})) {
                 return $type;
             }
