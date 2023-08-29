@@ -155,8 +155,10 @@ class Fivezap implements FivezapInterface
         $this->searchContact();
 
         // Exception se nenhum contato for encontrado.
+        $api_err = $this->erros['message'] ?? '';
         if (!isset($this->contact)) {
-            throw new FivezapException("Verifique o telefone fornecido ou os dados de conexão... $this->receiver_phone");
+            
+            throw new FivezapException("Existem erros de comunicação com a api. $api_err... $this->receiver_phone");
         }
 
         // busca ou cria uma conversação.
@@ -164,7 +166,7 @@ class Fivezap implements FivezapInterface
 
         // Exception se não conseguir abrir uma conversação com o contato.
         if (!isset($this->conversation)) {
-            throw new FivezapException("Erro ao abrir uma conversação para o contato atual. $this->receiver_phone");
+            throw new FivezapException("Erro ao criar uma conversação. $api_err... $this->receiver_phone");
         }
 
         return $this;
