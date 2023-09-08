@@ -7,6 +7,7 @@ use ForWebSystem\NotificationWhatsApp\Traits\RequestTrait;
 use ForWebSystem\NotificationWhatsApp\Contracts\SenderInterface as Sender;
 use ForWebSystem\NotificationWhatsApp\Contracts\ReceiverInterface as Receiver;
 use ForWebSystem\NotificationWhatsApp\Exceptions\FivezapException;
+use GuzzleHttp\Psr7\MultipartStream;
 use ForWebSystem\NotificationWhatsApp\Helpers\Helpers;
 
 class Fivezap implements FivezapInterface
@@ -120,8 +121,8 @@ class Fivezap implements FivezapInterface
     public function __construct(Sender $sender, Receiver $receiver)
     {
         // busca constantes do .env
-        $this->host = $_ENV['FIVEZAP_HOST'];
-        $this->api_version = $_ENV['FIVEZAP_API_VERSION'];
+        $this->host = env('FIVEZAP_HOST');
+        $this->api_version = env('FIVEZAP_API_VERSION');
 
         // Preenche propriedades do remetente.
         $this->sender = $sender;
@@ -195,6 +196,142 @@ class Fivezap implements FivezapInterface
     }
 
     /**
+     * Faz tratamento de arquivos de audio antes do envio.
+     *
+     * @param string $path
+     * @param string $message
+     * @return void
+     */
+    public function audio(string $path, string $message = '')
+    {
+        // tipo de media.
+        $media_type = 'file';
+
+        // Tipos mime para audio.
+        $mime_types =
+        [
+            'mp3' => 'audio/mpeg',
+            'ogg' => 'audio/ogg',
+        ];
+
+        // Faz tratamento e validação do arquivo.
+        $file = Helpers::processFile($path, $mime_types);
+
+        return $this->sendAttachment($file->content, $file->extension, $media_type, $message);
+    }
+
+    /**
+     * Faz tratamento de imagens antes do envio.
+     *
+     * @param string $path
+     * @return void
+     */
+    public function image(string $path, string $message = '')
+    {
+        // tipo de media.
+        $media_type = 'image';
+
+        // Tipos mime para imagens.
+        $mime_types =
+        [
+            'png' => 'image/png',
+            'jpeg' => 'image/jpeg',
+            'jpg' => 'image/jpeg',
+            'bmp' => 'image/bmp'
+        ];
+
+        // Faz tratamento e validação do arquivo.
+        $file = Helpers::processFile($path, $mime_types);
+
+        return $this->sendAttachment($file->content, $file->extension, $media_type, $message);
+    }
+
+    /**
+     * Faz o tratamento de documentos antes do envio.
+     *
+     * @param string $path
+     * @return void
+     */
+    public function file(string $path, string $message = '')
+    {
+        // tipo de media.
+        $media_type = 'file';
+
+        // Tipos mime para documentos.
+        $mime_types =
+        [
+            'pdf' => 'application/pdf',
+            'doc' => 'application/msword',
+            'xls' => 'application/vnd.ms-excel',
+            'ppt' => 'application/vnd.ms-powerpoint',
+            'aac' => 'audio/aac'
+        ];
+
+        // Faz tratamento e validação do arquivo.
+        $file = Helpers::processFile($path, $mime_types);
+
+        return $this->sendAttachment($file->content, $file->extension, $media_type, $message);
+
+        // code...
+    }
+
+    /**
+     * Faz envio dos anexos.
+     *
+     * @param string $attachment
+     * @param string $type
+     * @param string $message
+     * @return void
+     */
+    public function sendAttachment(string $attachment, string $extension, string $type, string $message)
+    {
+        // Metodo da request, endpoint e url.
+        $this->method = 'POST';
+        $this->end_point = "/accounts/$this->account_id/conversations/{$this->conversation->id}/messages";
+        $this->url = $this->host . $this->api_version . $this->end_point;
+
+        // Cabeçalhos.
+        $headers = [
+            'Content-Type' => 'multipart/form-data; boundary=----WebKitFormBoundary',
+            'api_access_token' => $this->token
+        ];
+
+        // Boundary do cabeçalho.
+        $boundary = '----WebKitFormBoundary';
+
+        // Multipart form-data.
+        $multipart = [
+            [
+                'name' => 'attachments[]',
+                'contents' => $attachment,
+                'filename' => uniqid() . "$extension"
+            ],
+            [
+                'name' => 'content',
+                'contents' => $message
+            ],
+            [
+                'name' => 'message_type',
+                'contents' => 'outgoing'
+            ],
+            [
+                'name' => 'file_type',
+                'contents' => $type
+            ]
+        ];
+
+        // Opções da requisição.
+        $this->options = [
+            'headers' => $headers,
+            'body' => new MultipartStream($multipart, $boundary)
+        ];
+
+        // Faz requisição.
+        $response = $this->makeHttpRequest();
+        return $response;
+    }
+
+    /**
      * Busca um contato pelo name, identifier, email ou phone number
      *
      * @param string $param
@@ -210,12 +347,12 @@ class Fivezap implements FivezapInterface
 
         // pega os 3 primeiros caracteres do telefone
         if ($country_code != '+55') {
-            throw new FivezapException('O contato não pertence ao Brasil. ', 400);
+            throw new FivezapException("O contato $this->receiver_phone, não pertence ao Brasil. ", 400);
         }
 
         // se menor que 13 e menor que 14 ou naior que 15 gero exceção.
         if (($len < 13 && $len < 14) || $len > 14) {
-            throw new FivezapException('Número de telefone inválido.', 400);
+            throw new FivezapException("Número de telefone $this->receiver_phone é inválido. ", 400);
         }
 
         $this->method = 'GET';
@@ -223,7 +360,6 @@ class Fivezap implements FivezapInterface
         $this->url = $this->host . $this->api_version . $this->end_point;
 
         $response = $this->makeHttpRequest();
-
         // para mais de um resultado, filtra e compara um que seja igual ao recebido.
         if (isset($response['meta']) && $response['meta']['count']) {
             $meta = $response['meta'];
@@ -404,7 +540,7 @@ class Fivezap implements FivezapInterface
 
     /**
      * Cadastro de webhooks.
-     * 
+     *
      * conversation_created
      * conversation_status_changed
      * conversation_updated
@@ -425,8 +561,8 @@ class Fivezap implements FivezapInterface
         $this->body =
         [
             'webhook' => [
-                "url" => $url,
-                "subscriptions" => $subscriptions
+                'url' => $url,
+                'subscriptions' => $subscriptions
             ]
         ];
 
@@ -465,11 +601,11 @@ class Fivezap implements FivezapInterface
     public static function execMethod(Sender $sender, Receiver $receiver, string $method = '', array $params)
     {
         // Verifica se metodo passado existe.
-        if (!method_exists(Self::class, $method)) {
-            Throw new FivezapException("Método $method() não encontrado no contexto atual.");
+        if (!method_exists(self::class, $method)) {
+            throw new FivezapException("Método $method() não encontrado no contexto atual.");
         }
-        
-        // Objeto de da classe atual.
+
+        // Objeto da classe atual.
         $fivezap = (new self($sender, $receiver));
 
         // Executa metodo passando parâmetros.

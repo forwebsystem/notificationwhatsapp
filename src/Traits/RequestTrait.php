@@ -44,6 +44,12 @@ trait RequestTrait
     protected $body = null;
 
     /**
+     * Request options
+     *
+     */
+    protected $options = null;
+
+    /**
      * Resposta da requisição atual;
      *
      */
@@ -78,16 +84,18 @@ trait RequestTrait
     public function makeHttpRequest()
     {
         $client = new Client();
+        $options = 
+        [
+            'headers' => $this->headers,
+            'body' => json_encode($this->body),
+        ];
 
         try {
             // Envia requisição.
             $response = $client->request(
                 $this->method,
                 $this->url,
-                [
-                    'headers' => $this->headers,
-                    'body' => json_encode($this->body),
-                ]
+                $this->options ?? $options
             );
 
             // Guarda status code
