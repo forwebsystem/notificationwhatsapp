@@ -81,7 +81,6 @@ class WebhookController extends Controller
             ->where('notificationwhatsapp_token', $inbox_id)
             ->first();
 
-            // salva requisicao
             $notification = $fivezap->save($method, $url, $message_type, $request->all());
 
             // preenche objeto de mensagem e dispara evento.

@@ -41,7 +41,15 @@ class NotificationWhatsAppReceived extends Model
     public function getContext()
     {
         // parse do conteudo da coluna context.
-        return json_decode($this->context);
+        $context = json_decode($this->context);
+
+        // se vier json valida e retorna.
+        if (json_last_error() === JSON_ERROR_NONE) {
+            return $context;
+        }
+
+        // se não pega conteudo bruto.
+        return $this->context;
     }
 
     public function html($height="250px")
@@ -56,7 +64,8 @@ class NotificationWhatsAppReceived extends Model
                 return $context->message ?? $context;
             case 'image':
                 $descricao = $context->caption ?? '';
-                return "<img src='{$context->imageUrl}' height='{$height}' width='auto' /><br />". $descricao ?? '';
+                $img = $context->imageUrl ?? '#';
+                return "<img src='{$img}' height='{$height}' width='auto' /><br />". $descricao ?? '';
             default:
                 return "Mensagem do tipo {$type} ainda não suportada";
         }
@@ -66,12 +75,12 @@ class NotificationWhatsAppReceived extends Model
     {
         $types = ['text', 'image', 'audio', 'video', 'contact', 'document', 'location', 'sticker'];
         $data = json_decode($this->result);
-        foreach ($types as $type) {
-            // verifica existencia de indices e tipo para mensagens do fivezap 2.0
-            if (isset($data->content_type) && $data->content_type == $type) {
-                return $type;
-            }
-            
+        // verifica existencia de indices e tipo para mensagens do fivezap 2.0
+        if (isset($data->content_type) && in_array($data->content_type, $types)) {
+            return $data->content_type;
+        }
+
+        foreach ($types as $type) {    
             // fivezap 1.0.
             if (!empty($data->{$type})) {
                 return $type;
