@@ -84,8 +84,10 @@ class WebhookController extends Controller
             $notification = $fivezap->save($method, $url, $message_type, $request->all());
 
             // preenche objeto de mensagem e dispara evento.
-            $fivezap_message = new NotificationWhatsAppReceived($notification->toArray());
-            event(new NotificationWhatsAppReceivedEvent($fivezap_message, $user));
+            if($notification) {
+                $fivezap_message = new NotificationWhatsAppReceived($notification->toArray());
+                event(new NotificationWhatsAppReceivedEvent($fivezap_message, $user));
+            }
         }
     }
 }

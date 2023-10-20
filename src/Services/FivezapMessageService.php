@@ -12,6 +12,15 @@ class FivezapMessageService
     public function save($method, $url, $message_type, array $data)
     {
         $phone = explode('@', $data['conversation']['meta']['sender']['identifier'])[0];
+
+        $conteudo = '';
+        if(!$data['content']) {
+            $conteudo = 'Conteúdo inexistente.';
+        }
+
+        if(isset($data['attachments'])) {
+            $conteudo = json_encode($data['attachments']);
+        }
         
         try {
             return NotificationWhatsAppMensagem::create(array_merge(
@@ -25,7 +34,7 @@ class FivezapMessageService
                     'type_mensagem'     => $data['content_type'],
                     'phone_destination' => '--',
                     'phone_participant' => $phone,
-                    'context'           => $data['content'],
+                    'context'           => $conteudo,
                     'result'            => json_encode($data),
                     'sender_name'       => $data['conversation']['meta']['sender']['name'] ?? '',
                     'chat_name'         => $data['conversation']['id'] ?? '',
