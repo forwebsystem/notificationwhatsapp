@@ -13,11 +13,7 @@ class FivezapMessageService
     {
         $phone = explode('@', $data['conversation']['meta']['sender']['identifier'])[0];
 
-        $conteudo = '';
-        if(!$data['content']) {
-            $conteudo = 'Conteúdo inexistente.';
-        }
-
+        $conteudo = $data['content'] ?? 'Conteúdo inexistente.';
         if(isset($data['attachments'])) {
             $conteudo = json_encode($data['attachments']);
         }
@@ -41,12 +37,12 @@ class FivezapMessageService
                     'message_id'        => $data['conversation']['messages'][0]['id'] ?? '',
                     'from_me'           => '',
                     'status'            => $data['conversation']['status'] ?? ''
-                ], $data)
+                ], [])
             );
 
         } catch (\Exception $error) {
 
-            Log::debug(json_encode([
+            Log::error(json_encode([
                 'error_save' => json_encode([
                     'message' => $error->getMessage(),
                 ]),
@@ -62,6 +58,8 @@ class FivezapMessageService
                 'from_me'           => '',
                 'status'            => $data['conversation']['status'] ?? ''
             ]));
+
+            throw $error;
         }
     }
 }
