@@ -342,18 +342,6 @@ class Fivezap implements FivezapInterface
         // O formato esperado é +55xx912345678 ou +55xx12345678.
         // formato E.164, por exemplo: +5511000000000
         $value = $param ?? $this->receiver_phone;
-        $len = strlen($value);
-        $country_code = substr($value, 0, 3);
-
-        // pega os 3 primeiros caracteres do telefone
-        if ($country_code != '+55') {
-            throw new FivezapException("O contato $this->receiver_phone, não pertence ao Brasil. ", 400);
-        }
-
-        // se menor que 13 e menor que 14 ou naior que 15 gero exceção.
-        if (($len < 13 && $len < 14) || $len > 14) {
-            throw new FivezapException("Número de telefone $this->receiver_phone é inválido. ", 400);
-        }
 
         $this->method = 'GET';
         $this->end_point = "/accounts/$this->account_id/contacts/search?q={$value}";
@@ -405,11 +393,9 @@ class Fivezap implements FivezapInterface
             return $this->contact;
         }
 
+        $brasileiro = (substr($value, 0, 3) == '+55');
         // Busca novamente colocando ou retirando o nono digito.
-        if ($recursive) {
-            // Metodo que faz a mágica.
-            $value = Helpers::changePhoneDigit($value);
-
+        if ($recursive && $brasileiro) {
             // Faz a busca novamente.
             return $this->searchContact($value, false);
         }
