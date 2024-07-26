@@ -33,9 +33,13 @@ class NotificationWhatsAppReceived extends Model
     public function getPhoneParticipant()
     {
         $numero             = $this->phone_participant;
+        $ddi                = substr($numero, 0,2);
+        if($ddi != '55'){
+            return $numero;
+        }
         $dd                 = substr($numero, 2,2);
         $telefone           = substr($numero, 4);
-        return strlen($telefone) == 8 ? "{$dd}9{$telefone}" : "{$dd}{$telefone}";
+        return strlen($telefone) == 8 ? "{$ddi}{$dd}9{$telefone}" : "{$ddi}{$dd}{$telefone}";
     }
 
     public function getContext()
