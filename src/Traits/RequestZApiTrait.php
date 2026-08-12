@@ -41,7 +41,8 @@ trait RequestZApiTrait
         try {
             $options = [
                 'body' => json_encode($datas),
-                'headers' => [
+                'headers' => [                
+                    'Client-Token' => env('ZPAI_CLIENT_TOKEN'),
                     'Content-Type' => 'application/json'
                 ]
             ];
